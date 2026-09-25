@@ -1,0 +1,4 @@
+/** Re-mounts on navigation: gives every page a subtle fade-in. */
+export default function Template({ children }: { children: React.ReactNode }) {
+  return <div className="animate-fade-in">{children}</div>;
+}

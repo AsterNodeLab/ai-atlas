@@ -1,0 +1,21 @@
+/** Central branding & site configuration. Change name/logo here. */
+export const site = {
+  name: "AI Atlas",
+  tagline: "Glosario de Inteligencia Artificial",
+  description:
+    "Un glosario visual para aprender Inteligencia Artificial: desde qué es un token hasta cómo funciona un Transformer, explicado para humanos.",
+  locale: "es-MX",
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://ai-atlas.example.com").replace(/\/$/, ""),
+  contentDate: "2026-09-24",
+} as const;
+
+export const nav = [
+  { href: "/glossary", label: "Glosario" },
+  { href: "/explore", label: "Explorar" },
+  { href: "/learn", label: "Rutas" },
+  { href: "/map", label: "Mapa de IA" },
+] as const;
+
+export function absoluteUrl(path: string): string {
+  return `${site.url}${path.startsWith("/") ? path : `/${path}`}`;
+}

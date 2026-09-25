@@ -1,0 +1,208 @@
+import type { TermInput } from "@/types/glossary";
+
+export const promptingTerms: TermInput[] = [
+  {
+    slug: "prompt",
+    name: "Prompt",
+    spanishName: "Instrucción o entrada para el modelo",
+    aliases: ["Instrucción", "Consulta", "Input"],
+    category: "prompt-engineering",
+    secondaryCategories: ["fundamentals", "llm"],
+    difficulty: "beginner",
+    type: "concept",
+    shortDefinition: "El texto (y a veces imágenes u otros datos) que se le da a un modelo generativo para indicarle qué hacer.",
+    simpleExplanation:
+      "Un prompt es lo que le escribes a la IA: una pregunta, una instrucción o un documento con una petición. La calidad de la respuesta depende muchísimo de lo claro y completo que sea el prompt.\n\nNo es solo tu mensaje: en una aplicación real, el prompt completo suele incluir instrucciones del sistema, ejemplos, documentos recuperados y el historial de la conversación.",
+    example: {
+      title: "Un prompt vago vs. uno claro",
+      code:
+        "Vago:\n  Escribe sobre IA.\n\nClaro:\n  Escribe un párrafo de 80 palabras que explique qué es un LLM\n  a una persona sin conocimientos técnicos. Usa una analogía\n  cotidiana y evita la jerga.",
+    },
+    technicalExplanation:
+      "Para el modelo, el prompt es la secuencia de [[token|tokens]] de entrada sobre la que condiciona su generación. Las APIs de chat estructuran el prompt en mensajes con roles (sistema, usuario, asistente), que el [[tokenizer]] convierte en una sola secuencia con tokens especiales. Todo lo que forma parte del prompt ocupa espacio en la [[context-window|ventana de contexto]].",
+    whyItMatters: "Es la interfaz principal para controlar un modelo sin reentrenarlo.",
+    useCases: ["Chatbots", "Automatización de tareas", "Generación de contenido", "Clasificación sin entrenamiento"],
+    prerequisites: ["llm"],
+    relatedTerms: ["prompt-engineering", "system-prompt", "few-shot-learning", "context-window"],
+    nextTerms: ["prompt-engineering", "system-prompt"],
+    tags: ["instrucción", "pregunta", "mensaje"],
+  },
+  {
+    slug: "prompt-engineering",
+    name: "Prompt Engineering",
+    spanishName: "Ingeniería de prompts",
+    aliases: ["Ingeniería de prompts", "Diseño de prompts", "Context engineering"],
+    category: "prompt-engineering",
+    difficulty: "beginner",
+    type: "technique",
+    shortDefinition: "La práctica de diseñar y ajustar prompts para obtener respuestas más útiles, precisas y consistentes de un modelo.",
+    simpleExplanation:
+      "Es el arte de pedirle bien las cosas a una IA. Pequeños cambios —dar contexto, explicar el objetivo, mostrar un ejemplo, pedir un formato específico— pueden transformar una respuesta mediocre en una excelente.\n\nNo es magia ni trucos secretos: se parece mucho a escribir un buen encargo para una persona muy capaz que no conoce tu situación.",
+    inThirtySeconds: [
+      "Explica el objetivo y el contexto.",
+      "Sé específico sobre el formato y la longitud.",
+      "Da ejemplos de lo que esperas.",
+      "Divide tareas complejas en pasos.",
+      "Prueba, evalúa y ajusta.",
+    ],
+    technicalExplanation:
+      "Técnicas comunes: instrucciones explícitas y delimitadores para separar datos de instrucciones; [[few-shot-learning|ejemplos few-shot]]; [[chain-of-thought|pedir razonamiento paso a paso]]; asignar un rol en el [[system-prompt]]; solicitar [[structured-output|salidas estructuradas]]; y encadenar prompts en [[agentic-workflow|flujos de varios pasos]]. En sistemas complejos se habla de **context engineering**: decidir qué información entra en el contexto, en qué orden y formato. Los cambios de prompt deben validarse con [[evaluation|evals]], no solo con ejemplos sueltos.",
+    whyItMatters: "Es la forma más rápida y barata de mejorar un sistema basado en LLMs antes de recurrir a fine-tuning.",
+    useCases: ["Construcción de chatbots", "Automatización", "Extracción de datos", "Agentes"],
+    prerequisites: ["prompt"],
+    relatedTerms: ["system-prompt", "few-shot-learning", "chain-of-thought", "structured-output", "evaluation"],
+    nextTerms: ["few-shot-learning", "chain-of-thought", "system-prompt"],
+    tags: ["prompting", "instrucciones", "context engineering"],
+  },
+  {
+    slug: "system-prompt",
+    name: "System Prompt",
+    spanishName: "Instrucciones del sistema",
+    aliases: ["Prompt de sistema", "Mensaje de sistema", "System message", "Instrucciones del sistema"],
+    category: "prompt-engineering",
+    difficulty: "beginner",
+    type: "concept",
+    shortDefinition: "Las instrucciones de base que define el desarrollador para establecer el rol, el tono y las reglas de un modelo en toda la conversación.",
+    simpleExplanation:
+      "Cuando una empresa construye un asistente, no quiere que cada usuario tenga que explicarle al modelo quién es y cómo debe comportarse. Para eso existe el system prompt: un mensaje invisible para el usuario que dice, por ejemplo, «Eres el asistente de soporte de la tienda X, responde en español y no des asesoría legal».",
+    example: {
+      code:
+        "system: Eres un tutor de matemáticas para secundaria.\n        Explica paso a paso y no des la respuesta final\n        hasta que el estudiante lo intente.\n\nuser:   ¿Cuánto es 3x + 5 = 20?",
+    },
+    technicalExplanation:
+      "En las APIs de chat, el system prompt ocupa un rol diferenciado. Los modelos se entrenan para darle más prioridad que a los mensajes del usuario, aunque no es una barrera de seguridad infalible: ataques de [[jailbreak]] y [[prompt-injection]] intentan anularlo. Suele contener rol, contexto del producto, reglas, formato de salida y definiciones de [[tool-calling|herramientas]].",
+    whyItMatters: "Es la forma principal de convertir un modelo genérico en un producto con personalidad y reglas propias.",
+    useCases: ["Asistentes de marca", "Agentes", "Chatbots de soporte", "Tutores"],
+    prerequisites: ["prompt"],
+    relatedTerms: ["prompt", "prompt-engineering", "guardrails", "prompt-injection"],
+    nextTerms: ["prompt-engineering", "guardrails"],
+    tags: ["rol", "instrucciones", "sistema"],
+  },
+  {
+    slug: "zero-shot-learning",
+    name: "Zero-Shot Learning",
+    spanishName: "Aprendizaje sin ejemplos",
+    aliases: ["Zero-shot", "Cero ejemplos", "Zero shot prompting"],
+    category: "prompt-engineering",
+    secondaryCategories: ["machine-learning"],
+    difficulty: "intermediate",
+    type: "technique",
+    shortDefinition: "Pedirle a un modelo que realice una tarea sin darle ningún ejemplo, solo la instrucción.",
+    simpleExplanation:
+      "«Clasifica esta reseña como positiva o negativa». Sin ejemplos, sin entrenamiento especial: el modelo usa lo que ya sabe. Los LLMs modernos son sorprendentemente buenos en esto porque vieron tareas parecidas durante su entrenamiento.",
+    technicalExplanation:
+      "En ML clásico, zero-shot se refería a reconocer clases no vistas en entrenamiento (por ejemplo, usando descripciones o embeddings compartidos, como en CLIP). En LLMs designa resolver una tarea solo a partir de la instrucción. El [[instruction-tuning]] mejoró mucho esta capacidad.",
+    whyItMatters: "Permite prototipar soluciones en minutos sin reunir datos de entrenamiento.",
+    useCases: ["Clasificación rápida", "Prototipos", "Traducción", "Extracción de datos"],
+    prerequisites: ["prompt"],
+    relatedTerms: ["few-shot-learning", "in-context-learning", "instruction-tuning"],
+    nextTerms: ["few-shot-learning"],
+    tags: ["sin ejemplos", "zero shot"],
+  },
+  {
+    slug: "few-shot-learning",
+    name: "Few-Shot Learning",
+    spanishName: "Aprendizaje con pocos ejemplos",
+    aliases: ["Few-shot", "Pocos ejemplos", "Few shot prompting", "One-shot"],
+    category: "prompt-engineering",
+    secondaryCategories: ["machine-learning"],
+    difficulty: "intermediate",
+    type: "technique",
+    shortDefinition: "Incluir unos pocos ejemplos de la tarea dentro del prompt para mostrarle al modelo exactamente qué se espera.",
+    simpleExplanation:
+      "En lugar de describir con palabras lo que quieres, lo muestras. Das dos o tres ejemplos de entrada y salida, y luego el caso nuevo. El modelo imita el patrón.",
+    example: {
+      code:
+        "Convierte a formato de fecha ISO.\n\n\"3 de mayo de 2024\"  → 2024-05-03\n\"12/01/2023\"         → 2023-01-12\n\"primero de junio 2025\" → ",
+    },
+    technicalExplanation:
+      "Es una forma de [[in-context-learning]]: el modelo no actualiza sus pesos, sino que usa los ejemplos del contexto para inferir la tarea. El paper de GPT-3 (Brown et al., 2020) mostró que esta capacidad mejora con la escala. La selección, el orden y el formato de los ejemplos influyen en el resultado; ejemplos poco diversos pueden sesgar las respuestas.",
+    whyItMatters: "Es una forma muy efectiva de controlar formato y estilo sin fine-tuning.",
+    useCases: ["Formateo de datos", "Clasificación con etiquetas propias", "Imitar un estilo"],
+    prerequisites: ["zero-shot-learning"],
+    relatedTerms: ["in-context-learning", "zero-shot-learning", "prompt-engineering"],
+    nextTerms: ["in-context-learning", "chain-of-thought"],
+    tags: ["ejemplos", "few shot"],
+    sources: [
+      { title: "Language Models are Few-Shot Learners", authors: "Brown et al.", year: 2020, url: "https://arxiv.org/abs/2005.14165", kind: "paper" },
+    ],
+  },
+  {
+    slug: "in-context-learning",
+    name: "In-Context Learning",
+    spanishName: "Aprendizaje en contexto",
+    acronym: "ICL",
+    aliases: ["Aprendizaje en contexto", "ICL"],
+    category: "prompt-engineering",
+    secondaryCategories: ["llm"],
+    difficulty: "intermediate",
+    type: "concept",
+    shortDefinition: "La capacidad de un LLM de aprender una tarea a partir de instrucciones o ejemplos incluidos en el prompt, sin cambiar sus pesos.",
+    simpleExplanation:
+      "Es un «aprendizaje» temporal: durante la conversación el modelo se adapta a lo que le muestras, pero al terminar no conserva nada. Como un actor que lee el guion justo antes de entrar a escena.",
+    technicalExplanation:
+      "ICL emerge del [[pretraining|preentrenamiento]] a gran escala. Investigaciones sugieren que mecanismos internos como las *induction heads* (identificadas en trabajos de [[mechanistic-interpretability|interpretabilidad mecanicista]]) contribuyen a esta capacidad de copiar y completar patrones. A diferencia del [[fine-tuning]], su efecto se limita a la [[context-window|ventana de contexto]] actual.",
+    whyItMatters: "Explica por qué los prompts, ejemplos y documentos en el contexto cambian tanto el comportamiento de un modelo.",
+    useCases: ["Few-shot prompting", "RAG", "Adaptación rápida a formatos"],
+    prerequisites: ["prompt", "llm"],
+    relatedTerms: ["few-shot-learning", "zero-shot-learning", "fine-tuning", "context-window"],
+    nextTerms: ["fine-tuning", "rag"],
+    tags: ["icl", "aprendizaje temporal"],
+  },
+  {
+    slug: "chain-of-thought",
+    name: "Chain-of-Thought",
+    spanishName: "Cadena de razonamiento",
+    acronym: "CoT",
+    aliases: ["Cadena de pensamiento", "Cadena de razonamiento", "CoT", "Razonamiento paso a paso"],
+    category: "prompt-engineering",
+    secondaryCategories: ["llm"],
+    difficulty: "intermediate",
+    type: "technique",
+    shortDefinition: "Hacer que un modelo escriba sus pasos intermedios de razonamiento antes de dar la respuesta final.",
+    simpleExplanation:
+      "Si le pides a alguien que resuelva mentalmente 23 × 47, es fácil equivocarse. Si le dejas escribir los pasos, acierta más. Con los LLMs pasa algo parecido: pedirles que «piensen paso a paso» mejora su desempeño en problemas de lógica, matemáticas y planificación.",
+    example: {
+      dialogue: [
+        { role: "user", text: "Tengo 3 cajas con 12 manzanas y regalo 7. ¿Cuántas me quedan? Piensa paso a paso." },
+        { role: "assistant", text: "3 cajas × 12 manzanas = 36. 36 − 7 = 29. Te quedan 29 manzanas." },
+      ],
+    },
+    technicalExplanation:
+      "Wei et al. (2022) mostraron que incluir ejemplos con razonamiento explícito mejora el rendimiento en tareas de varios pasos, sobre todo en modelos grandes. Una razón plausible es que cada token generado añade cómputo: escribir pasos intermedios da al modelo más «espacio» para calcular. Variantes: *self-consistency* (muestrear varios razonamientos y votar) y árboles de pensamiento. Los [[reasoning-model|modelos de razonamiento]] internalizan este comportamiento mediante entrenamiento.\n\nUna pregunta abierta de investigación es la **fidelidad**: el razonamiento escrito no siempre refleja fielmente el proceso que realmente llevó a la respuesta.",
+    whyItMatters: "Fue una de las primeras evidencias de que dar más cómputo al momento de responder mejora el razonamiento, idea central del [[test-time-compute]].",
+    useCases: ["Problemas matemáticos", "Lógica", "Planificación", "Depuración de código"],
+    prerequisites: ["prompt-engineering"],
+    relatedTerms: ["reasoning-model", "test-time-compute", "few-shot-learning", "latent-reasoning"],
+    nextTerms: ["reasoning-model", "test-time-compute"],
+    tags: ["paso a paso", "razonamiento", "cot"],
+    sources: [
+      { title: "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models", authors: "Wei et al.", year: 2022, url: "https://arxiv.org/abs/2201.11903", kind: "paper" },
+      { title: "Self-Consistency Improves Chain of Thought Reasoning in Language Models", authors: "Wang et al.", year: 2022, url: "https://arxiv.org/abs/2203.11171", kind: "paper" },
+    ],
+  },
+  {
+    slug: "structured-output",
+    name: "Structured Output",
+    spanishName: "Salida estructurada",
+    aliases: ["Salida estructurada", "JSON mode", "JSON schema", "Structured outputs"],
+    category: "prompt-engineering",
+    secondaryCategories: ["ai-engineering"],
+    difficulty: "intermediate",
+    type: "technique",
+    shortDefinition: "Hacer que un modelo responda en un formato predecible y procesable por máquinas, como JSON que cumple un esquema.",
+    simpleExplanation:
+      "Para una persona, un párrafo está bien. Para un programa, es mucho más útil recibir datos ordenados: nombre, fecha y monto en campos separados. La salida estructurada garantiza (o hace muy probable) que el modelo responda exactamente con ese formato.",
+    example: {
+      code: "{\n  \"cliente\": \"Ana López\",\n  \"monto\": 1250.00,\n  \"moneda\": \"MXN\",\n  \"fecha\": \"2026-03-14\"\n}",
+    },
+    technicalExplanation:
+      "Se logra con instrucciones y ejemplos, o de forma más robusta con **decodificación restringida** (*constrained decoding*): en cada paso se enmascaran los tokens que violarían una gramática o un JSON Schema. Muchas APIs ofrecen esta función directamente. Es la base técnica del [[function-calling]], donde el modelo produce argumentos estructurados para una función.",
+    whyItMatters: "Convierte a los LLMs en componentes confiables dentro de software tradicional.",
+    useCases: ["Extracción de datos de documentos", "Integración con APIs", "Function calling", "Clasificación con etiquetas fijas"],
+    prerequisites: ["prompt"],
+    relatedTerms: ["function-calling", "tool-calling", "api", "prompt-engineering"],
+    nextTerms: ["function-calling"],
+    tags: ["json", "esquema", "formato"],
+  },
+];
