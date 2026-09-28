@@ -12,6 +12,7 @@ npm run build      # exportación estática en ./out (todas las páginas se prer
 npm run start      # servir ./out localmente
 npm run lint       # ESLint
 npm run typecheck  # tsc --noEmit
+npm run models:sync  # actualiza el catálogo de modelos desde la API pública de OpenRouter
 ```
 
 ## Despliegue (GitHub Pages)
@@ -31,6 +32,8 @@ app/                      Rutas (todas estáticas / SSG)
   map/                    Mapa de IA (knowledge graph)
   categories/             Categorías y /categories/[slug]
   saved/                  Guardados + vistos recientemente (localStorage)
+  tools/                  Recursos: directorio de herramientas de IA (enlaces oficiales verificados)
+  models/                 Recursos: glosario de modelos, /models/[proveedor] y /models/[proveedor]/[modelo]
   search-index.json/      Índice de búsqueda estático (lo consume el cliente)
   sitemap.ts, robots.ts, not-found.tsx
 components/
@@ -42,6 +45,9 @@ content/
   glossary/*.ts           Conceptos por tema (datos tipados)
   learning-paths/         Rutas
   categories.ts, map.ts
+  tools.ts                Herramientas curadas (nivel, categoría, URL oficial)
+  models/openrouter.json  Snapshot procesado de la API de OpenRouter (solo datos estructurados)
+  models/providers.ts     Descripciones propias de cada proveedor
 lib/
   glossary.ts             Acceso a datos + validación de enlaces en build
   search.ts               Motor de búsqueda local (normalización, alias, fuzzy)
@@ -60,3 +66,9 @@ Campos opcionales: `analogy`, `inThirtySeconds`, `diagram`, `example`, `realExam
 ## Branding
 
 Nombre, URL y locale en `lib/site.ts`; logo en `components/ui/logo.tsx`; colores como tokens CSS en `app/globals.css`.
+
+## Secciones de recursos
+
+- **Herramientas** (`/tools`): cada URL es el sitio oficial y se verificó (respuesta HTTP y título de la página). Para agregar una, edita `content/tools.ts` y actualiza `toolsVerifiedAt`.
+- **Modelos** (`/models`): `npm run models:sync` descarga la lista pública de OpenRouter, agrupa variantes `:free`/`:batch`, excluye alias y routers y guarda solo datos estructurados. Las descripciones en español se generan a partir de esos datos (no se copian textos de los proveedores).
+- Ambas secciones usan el tema `.theme-resources` (acento teal) para distinguirse del glosario.

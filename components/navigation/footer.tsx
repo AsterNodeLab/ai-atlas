@@ -22,8 +22,12 @@ const columns = [
     ],
   },
   {
-    title: "Proyecto",
-    links: [{ href: "/about", label: "Acerca de" }],
+    title: "Recursos",
+    links: [
+      { href: "/tools", label: "Herramientas de IA" },
+      { href: "/models", label: "Glosario de modelos" },
+      { href: "/about", label: "Acerca de" },
+    ],
   },
 ];
 

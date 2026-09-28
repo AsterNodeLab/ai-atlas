@@ -9,12 +9,21 @@ export const site = {
   contentDate: "2026-09-24",
 } as const;
 
-export const nav = [
+export interface NavItem {
+  href: string;
+  label: string;
+  /** Part of the separate "Recursos" area. */
+  resource?: boolean;
+}
+
+export const nav: NavItem[] = [
   { href: "/glossary", label: "Glosario" },
   { href: "/explore", label: "Explorar" },
   { href: "/learn", label: "Rutas" },
   { href: "/map", label: "Mapa de IA" },
-] as const;
+  { href: "/tools", label: "Herramientas", resource: true },
+  { href: "/models", label: "Modelos", resource: true },
+];
 
 export function absoluteUrl(path: string): string {
   return `${site.url}${path.startsWith("/") ? path : `/${path}`}`;

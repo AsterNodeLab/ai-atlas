@@ -55,6 +55,29 @@
   color-scheme: dark;
 }
 
+/*
+ * "Recursos" areas (Herramientas, Modelos): same design system, different accent,
+ * so external directories are clearly distinguishable from glossary content.
+ */
+.theme-resources {
+  --accent: #0d9488;
+  --accent-text: #0f766e;
+  --accent-soft: #ecfdf8;
+  --accent-contrast: #ffffff;
+}
+.dark .theme-resources,
+.dark.theme-resources {
+  --accent: #2dd4bf;
+  --accent-text: #5eead4;
+  --accent-soft: rgb(45 212 191 / 0.1);
+  --accent-contrast: #0a0a0a;
+}
+
+.resource-grid-bg {
+  background-image: radial-gradient(color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;

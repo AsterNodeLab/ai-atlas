@@ -23,6 +23,8 @@ import {
 } from "@/lib/glossary";
 import { difficultyLabels, difficultyOrder } from "@/lib/i18n";
 import { getMapData } from "@/lib/map";
+import { getAllModels, getProviders } from "@/lib/models";
+import { tools } from "@/content/tools";
 import { absoluteUrl, site } from "@/lib/site";
 
 const DAY = 86_400_000;
@@ -139,6 +141,29 @@ export default function HomePage() {
       <section aria-labelledby="mapa" className="py-16">
         <SectionHeading id="mapa" eyebrow="Mapa de IA" title="Cómo se conecta todo" description="De la IA en general hasta los agentes: cada concepto se construye sobre otros." href="/map" linkLabel="Abrir el mapa" />
         <KnowledgeGraph nodes={nodes} edges={edges} curved={curved} compact />
+      </section>
+
+      {/* Resources (distinct area) */}
+      <section aria-labelledby="recursos" className="theme-resources py-16">
+        <SectionHeading id="recursos" eyebrow="Recursos" title="Más allá del glosario" description="Directorios independientes para pasar de la teoría a la práctica." />
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {[
+            { href: "/tools", title: "Herramientas de IA", text: `${tools.length} herramientas con sus enlaces oficiales verificados, de asistentes para empezar a APIs y frameworks.`, cta: "Ver herramientas" },
+            { href: "/models", title: "Glosario de modelos", text: `${getAllModels().length} modelos de ${getProviders().length} proveedores con contexto, precios y capacidades, a partir de datos de OpenRouter.`, cta: "Ver modelos" },
+          ].map((r) => (
+            <li key={r.href}>
+              <Link href={r.href} className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-[color-mix(in_srgb,var(--accent)_28%,var(--border))] bg-accent-soft p-7 transition-transform duration-200 hover:-translate-y-0.5">
+                <span aria-hidden="true" className="resource-grid-bg pointer-events-none absolute inset-0 opacity-50 [mask-image:linear-gradient(to_bottom,black,transparent)]" />
+                <span className="relative text-[12px] font-medium uppercase tracking-[0.08em] text-accent-text">Recursos</span>
+                <span className="relative mt-3 text-[24px] font-semibold tracking-[-0.02em] text-fg">{r.title}</span>
+                <span className="relative mt-2 text-[15.5px] leading-relaxed text-muted">{r.text}</span>
+                <span className="relative mt-auto inline-flex items-center gap-1.5 pt-6 text-[14.5px] font-medium text-accent-text">
+                  {r.cta} <ArrowRightIcon size={14} className="transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* Term of the day */}
