@@ -72,3 +72,11 @@ Nombre, URL y locale en `lib/site.ts`; logo en `components/ui/logo.tsx`; colores
 - **Herramientas** (`/tools`): cada URL es el sitio oficial y se verificó (respuesta HTTP y título de la página). Para agregar una, edita `content/tools.ts` y actualiza `toolsVerifiedAt`.
 - **Modelos** (`/models`): `npm run models:sync` descarga la lista pública de OpenRouter, agrupa variantes `:free`/`:batch`, excluye alias y routers y guarda solo datos estructurados. Las descripciones en español se generan a partir de esos datos (no se copian textos de los proveedores).
 - Ambas secciones usan el tema `.theme-resources` (acento teal) para distinguirse del glosario.
+
+## Prompts y Prompt Factory
+
+- **`/prompts`**: guía breve e interactiva sobre cómo estructurar prompts para cada familia de modelos (Claude → XML, ChatGPT → Markdown con reglas de decisión, Gemini → contexto + ejemplos consistentes) y cómo diseñar loops de agentes (estado, herramientas, verificación, reintentos, condiciones de parada, Definition of Done).
+- **`/prompts/factory`**: compilador **determinista** de prompts (sin IA en ningún punto). Flujo: intención → `PromptSpec` (representación canónica) → normalizador → motor de reglas → adaptador por modelo → formateador → validador → prompt final.
+- El núcleo vive en `prompt-factory/` sin dependencias de React ni de Next.js, para reutilizarlo desde una API, CLI o extensión. Importa siempre desde `prompt-factory/index.ts`.
+- Añadir un modelo = un adaptador en `prompt-factory/adapters/` + una entrada en `prompt-factory/config/models.ts`.
+- Tests: `npm test` (runner nativo `node --test`, sin dependencias).

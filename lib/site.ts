@@ -23,6 +23,7 @@ export const nav: NavItem[] = [
   { href: "/map", label: "Mapa de IA" },
   { href: "/tools", label: "Herramientas", resource: true },
   { href: "/models", label: "Modelos", resource: true },
+  { href: "/prompts", label: "Prompts", resource: true },
 ];
 
 export function absoluteUrl(path: string): string {

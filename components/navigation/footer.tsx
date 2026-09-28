@@ -26,6 +26,8 @@ const columns = [
     links: [
       { href: "/tools", label: "Herramientas de IA" },
       { href: "/models", label: "Glosario de modelos" },
+      { href: "/prompts", label: "Prompts y agentes" },
+      { href: "/prompts/factory", label: "Prompt Factory" },
       { href: "/about", label: "Acerca de" },
     ],
   },

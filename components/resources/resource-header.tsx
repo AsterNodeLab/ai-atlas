@@ -1,7 +1,13 @@
 import Link from "next/link";
 
+const resourceTabs = [
+  { key: "tools", href: "/tools", label: "Herramientas" },
+  { key: "models", href: "/models", label: "Modelos" },
+  { key: "prompts", href: "/prompts", label: "Prompts" },
+] as const;
+
 /**
- * Distinct hero used by the "Recursos" sections (Herramientas, Modelos).
+ * Distinct hero used by the "Recursos" sections (Herramientas, Modelos, Prompts).
  * Shares typography with the rest of the site but uses the teal accent,
  * a dotted backdrop and a "Recursos" switcher so it reads as a separate area.
  */
@@ -12,7 +18,7 @@ export function ResourceHeader({
   description,
   meta,
 }: {
-  active: "tools" | "models";
+  active: (typeof resourceTabs)[number]["key"];
   eyebrow: string;
   title: string;
   description: string;
@@ -23,10 +29,7 @@ export function ResourceHeader({
       <div aria-hidden="true" className="resource-grid-bg pointer-events-none absolute inset-0 opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
       <div className="relative">
         <nav aria-label="Secciones de recursos" className="inline-flex rounded-full border border-[color-mix(in_srgb,var(--accent)_30%,var(--border))] bg-bg/70 p-1 text-[13.5px] backdrop-blur">
-          {[
-            { key: "tools", href: "/tools", label: "Herramientas" },
-            { key: "models", href: "/models", label: "Modelos" },
-          ].map((t) => (
+          {resourceTabs.map((t) => (
             <Link
               key={t.key}
               href={t.href}
