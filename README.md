@@ -33,6 +33,7 @@ app/                      Rutas (todas estáticas / SSG)
   categories/             Categorías y /categories/[slug]
   saved/                  Guardados + vistos recientemente (localStorage)
   tools/                  Recursos: directorio de herramientas de IA (enlaces oficiales verificados)
+  papers/                 Recursos: 20 papers fundamentales explicados y /papers/[slug]
   models/                 Recursos: glosario de modelos, /models/[proveedor] y /models/[proveedor]/[modelo]
   search-index.json/      Índice de búsqueda estático (lo consume el cliente)
   sitemap.ts, robots.ts, not-found.tsx
@@ -45,6 +46,7 @@ content/
   glossary/*.ts           Conceptos por tema (datos tipados)
   learning-paths/         Rutas
   categories.ts, map.ts
+  papers.ts               Papers: ficha original en español (problema, ideas, resultados, legado)
   tools.ts                Herramientas curadas (nivel, categoría, URL oficial)
   models/openrouter.json  Snapshot procesado de la API de OpenRouter (solo datos estructurados)
   models/providers.ts     Descripciones propias de cada proveedor
