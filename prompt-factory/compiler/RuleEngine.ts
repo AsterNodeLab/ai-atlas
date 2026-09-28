@@ -120,10 +120,8 @@ export const defaultRules: Rule[] = [
     id: "exact-output-structure",
     description: "Si se exige una estructura exacta, el formato de salida se prioriza (junto a la tarea) y se enfatiza.",
     when: (spec) => spec.outputFormat?.exactStructure === true,
-    apply: () => [
-      flag("prioritize-output-format"),
-      explain("output-format", "El formato de salida se reforzó y se acercó a la tarea porque pediste respetar la estructura exacta."),
-    ],
+    // Where the format moves is target-specific, so each adapter explains it.
+    apply: () => [flag("prioritize-output-format")],
   },
   {
     id: "tools-section",

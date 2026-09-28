@@ -142,13 +142,21 @@ const SUFFIXES = [
   "en", "ar", "er", "ir", "a", "e", "o", "s",
 ];
 
-/** Crude, deterministic stemmer good enough to match "usa/uses/usar" or "tabla/tablas/tables". */
+/**
+ * Crude, deterministic stemmer good enough to match "usa/uses/usar" or
+ * "tabla/tablas/tables". Spanish spelling alternations before e/i are unified
+ * (analiza/analices → analiz, busca/busque → busz, paga/pague → pag).
+ */
 export function stem(word: string): string {
   if (word.length < 3) return word;
+  let out = word;
   for (const suffix of SUFFIXES) {
-    if (word.endsWith(suffix) && word.length - suffix.length >= 2) return word.slice(0, -suffix.length);
+    if (word.endsWith(suffix) && word.length - suffix.length >= 2) {
+      out = word.slice(0, -suffix.length);
+      break;
+    }
   }
-  return word;
+  return out.replace(/qu$/, "c").replace(/gu$/, "g").replace(/c$/, "z");
 }
 
 export function tokenize(text: string): string[] {

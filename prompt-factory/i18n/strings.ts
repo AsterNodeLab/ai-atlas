@@ -114,6 +114,8 @@ export interface PromptStrings {
     /** Structural markers of the Gemini examples (identical in every example). */
     exampleInputMarker: string;
     exampleOutputMarker: string;
+    /** Word that opens a decision-rule condition ("Si", "If"). */
+    conditionPrefix: string;
     decisionRule: (when: string, then: string) => string;
     priorityOrder: (items: string[]) => string;
     priorityConflict: string;
@@ -146,6 +148,7 @@ export interface PromptStrings {
     recoveryClassify: string;
     recoveryCategoriesIntro: string;
     recoveryCategories: string[];
+    recoveryRulesIntro: string;
     recoveryRetry: (n: number) => string;
     recoveryRetryUnbounded: string;
     recoveryNeverRepeat: string;
@@ -268,6 +271,7 @@ const es: PromptStrings = {
     exampleOutput: "Salida ideal:",
     exampleInputMarker: "INPUT:",
     exampleOutputMarker: "OUTPUT:",
+    conditionPrefix: "Si",
     decisionRule: (when, then) => `${when}, ${then}.`,
     priorityOrder: (items) => `Prioriza en este orden: ${items.join(" > ")}.`,
     priorityConflict: "Si dos instrucciones entran en conflicto, aplica este orden de prioridad.",
@@ -353,13 +357,13 @@ const es: PromptStrings = {
     memoryClosing: "No registres como hecho nada que no hayas verificado.",
     verificationIntro: "Ajusta el nivel de verificación a la consecuencia de cada paso:",
     verificationLevels: [
-      { label: "Nivel 0", text: "sin verificación: pasos triviales y reversibles que no afectan el resultado final." },
-      { label: "Nivel 1", text: "autorrevisión: relee el resultado y comprueba que sea coherente con los requisitos." },
-      { label: "Nivel 2", text: "evidencia: contrasta el resultado con la salida de una herramienta o con una fuente." },
-      { label: "Nivel 3", text: "verificación independiente: confirma con una segunda fuente o con un método distinto." },
+      { label: "Nivel 0", text: "sin verificación, solo para pasos triviales y reversibles que no afectan el resultado final." },
+      { label: "Nivel 1", text: "autorrevisión — relee el resultado y comprueba que sea coherente con los requisitos." },
+      { label: "Nivel 2", text: "evidencia — contrasta el resultado con la salida de una herramienta o con una fuente." },
+      { label: "Nivel 3", text: "verificación independiente — confirma con una segunda fuente o con un método distinto." },
       {
         label: "Nivel 4",
-        text: "confirmación humana: las acciones irreversibles o de alto impacto requieren aprobación explícita antes de ejecutarse.",
+        text: "confirmación humana — las acciones irreversibles o de alto impacto requieren aprobación explícita antes de ejecutarse.",
       },
     ],
     finalVerificationIntro: "Antes de declarar la tarea completa, verifica:",
@@ -375,6 +379,7 @@ const es: PromptStrings = {
       "error de lógica o supuesto incorrecto",
       "herramienta no disponible",
     ],
+    recoveryRulesIntro: "Reglas de reintento:",
     recoveryRetry: (n) =>
       n <= 0
         ? "No reintentes una acción equivalente que ya falló."
@@ -513,6 +518,7 @@ const en: PromptStrings = {
     exampleOutput: "Ideal output:",
     exampleInputMarker: "INPUT:",
     exampleOutputMarker: "OUTPUT:",
+    conditionPrefix: "If",
     decisionRule: (when, then) => `${when}, ${then}.`,
     priorityOrder: (items) => `Prioritize in this order: ${items.join(" > ")}.`,
     priorityConflict: "If two instructions conflict, apply this priority order.",
@@ -593,11 +599,11 @@ const en: PromptStrings = {
     memoryClosing: "Do not record anything as fact unless you verified it.",
     verificationIntro: "Match the level of verification to the consequence of each step:",
     verificationLevels: [
-      { label: "Level 0", text: "no verification: trivial, reversible steps that do not affect the final result." },
-      { label: "Level 1", text: "self-review: reread the result and check it is consistent with the requirements." },
-      { label: "Level 2", text: "evidence: check the result against a tool output or a source." },
-      { label: "Level 3", text: "independent verification: confirm with a second source or a different method." },
-      { label: "Level 4", text: "human confirmation: irreversible or high-impact actions require explicit approval before they run." },
+      { label: "Level 0", text: "no verification, only for trivial, reversible steps that do not affect the final result." },
+      { label: "Level 1", text: "self-review — reread the result and check it is consistent with the requirements." },
+      { label: "Level 2", text: "evidence — check the result against a tool output or a source." },
+      { label: "Level 3", text: "independent verification — confirm with a second source or a different method." },
+      { label: "Level 4", text: "human confirmation — irreversible or high-impact actions require explicit approval before they run." },
     ],
     finalVerificationIntro: "Before declaring the task complete, verify:",
     recoveryClassify:
@@ -612,6 +618,7 @@ const en: PromptStrings = {
       "logic error or wrong assumption",
       "tool unavailable",
     ],
+    recoveryRulesIntro: "Retry rules:",
     recoveryRetry: (n) =>
       n <= 0
         ? "Do not retry an equivalent action that already failed."
