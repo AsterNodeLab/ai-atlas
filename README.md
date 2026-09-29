@@ -33,6 +33,7 @@ app/                      Rutas (todas estáticas / SSG)
   categories/             Categorías y /categories/[slug]
   saved/                  Guardados + vistos recientemente (localStorage)
   tools/                  Recursos: directorio de herramientas de IA (enlaces oficiales verificados)
+  agents/                 Recursos: Anatomía de un agente (incrusta public/anatomia_agente_ia.html)
   papers/                 Recursos: 20 papers fundamentales explicados y /papers/[slug]
   models/                 Recursos: glosario de modelos, /models/[proveedor] y /models/[proveedor]/[modelo]
   search-index.json/      Índice de búsqueda estático (lo consume el cliente)

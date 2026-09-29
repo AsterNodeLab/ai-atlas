@@ -25,6 +25,7 @@ export const nav: NavItem[] = [
   { href: "/models", label: "Modelos", resource: true },
   { href: "/prompts", label: "Prompts", resource: true },
   { href: "/papers", label: "Papers", resource: true },
+  { href: "/agents", label: "Agentes", resource: true },
 ];
 
 export function absoluteUrl(path: string): string {

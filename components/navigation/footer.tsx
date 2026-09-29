@@ -29,6 +29,7 @@ const columns = [
       { href: "/prompts", label: "Prompts y agentes" },
       { href: "/prompts/factory", label: "Prompt Factory" },
       { href: "/papers", label: "Papers explicados" },
+      { href: "/agents", label: "Anatomía de un agente" },
       { href: "/about", label: "Acerca de" },
     ],
   },

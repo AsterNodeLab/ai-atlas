@@ -147,10 +147,11 @@ export default function HomePage() {
       {/* Resources (distinct area) */}
       <section aria-labelledby="recursos" className="theme-resources py-16">
         <SectionHeading id="recursos" eyebrow="Recursos" title="Más allá del glosario" description="Directorios independientes para pasar de la teoría a la práctica." />
-        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[
             { href: "/tools", title: "Herramientas de IA", text: `${tools.length} herramientas con sus enlaces oficiales verificados, de asistentes para empezar a APIs y frameworks.`, cta: "Ver herramientas" },
             { href: "/prompts", title: "Prompts y agentes", text: "Cómo estructurar prompts para Claude, ChatGPT y Gemini, cómo diseñar loops de agentes y un compilador de prompts sin IA.", cta: "Aprender y construir" },
+            { href: "/agents", title: "Anatomía de un agente", text: "Una experiencia 3D con un robot humanoide: modelo, system prompt, contexto, memoria, tools, skills, guardrails y el loop.", cta: "Explorar en 3D" },
             { href: "/papers", title: "Papers explicados", text: `Los ${papers.length} papers que construyeron la IA moderna, del Transformer a DeepSeek-R1, explicados en español.`, cta: "Leer papers" },
             { href: "/models", title: "Glosario de modelos", text: `${getAllModels().length} modelos de ${getProviders().length} proveedores con contexto, precios y capacidades, a partir de datos de OpenRouter.`, cta: "Ver modelos" },
           ].map((r) => (
