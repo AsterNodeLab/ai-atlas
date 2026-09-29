@@ -4,12 +4,13 @@ const resourceTabs = [
   { key: "tools", href: "/tools", label: "Herramientas" },
   { key: "models", href: "/models", label: "Modelos" },
   { key: "prompts", href: "/prompts", label: "Prompts" },
+  { key: "llms", href: "/llms", label: "LLMs" },
   { key: "papers", href: "/papers", label: "Papers" },
   { key: "agents", href: "/agents", label: "Agentes" },
 ] as const;
 
 /**
- * Distinct hero used by the "Recursos" sections (Herramientas, Modelos, Prompts, Papers, Agentes).
+ * Distinct hero used by the "Recursos" sections (Herramientas, Modelos, Prompts, LLMs, Papers, Agentes).
  * Shares typography with the rest of the site but uses the teal accent,
  * a dotted backdrop and a "Recursos" switcher so it reads as a separate area.
  */

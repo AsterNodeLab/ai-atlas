@@ -22,7 +22,7 @@ export function NavLinks({ vertical = false, onNavigate }: { vertical?: boolean;
               className={
                 vertical
                   ? `block border-b border-border py-4 text-[22px] font-medium tracking-tight ${active ? "text-fg" : "text-muted"}`
-                  : `rounded-md px-2.5 py-1.5 text-[14.5px] transition-colors ${active ? "text-fg" : "text-muted hover:text-fg"}`
+                  : `whitespace-nowrap rounded-md px-2 py-1.5 text-[14.5px] transition-colors ${active ? "text-fg" : "text-muted hover:text-fg"}`
               }
             >
               {item.label}

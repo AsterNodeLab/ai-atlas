@@ -24,6 +24,7 @@ export const nav: NavItem[] = [
   { href: "/tools", label: "Herramientas", resource: true },
   { href: "/models", label: "Modelos", resource: true },
   { href: "/prompts", label: "Prompts", resource: true },
+  { href: "/llms", label: "LLMs", resource: true },
   { href: "/papers", label: "Papers", resource: true },
   { href: "/agents", label: "Agentes", resource: true },
 ];

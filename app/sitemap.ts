@@ -7,7 +7,7 @@ import { absoluteUrl, site } from "@/lib/site";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPages = ["/", "/glossary", "/explore", "/learn", "/map", "/categories", "/tools", "/models", "/prompts", "/prompts/factory", "/papers", "/agents", "/about"].map((path) => ({
+  const staticPages = ["/", "/glossary", "/explore", "/learn", "/map", "/categories", "/tools", "/models", "/prompts", "/prompts/factory", "/llms", "/papers", "/agents", "/about"].map((path) => ({
     url: absoluteUrl(path),
     lastModified: site.contentDate,
     changeFrequency: "weekly" as const,

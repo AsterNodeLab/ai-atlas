@@ -28,6 +28,7 @@ const columns = [
       { href: "/models", label: "Glosario de modelos" },
       { href: "/prompts", label: "Prompts y agentes" },
       { href: "/prompts/factory", label: "Prompt Factory" },
+      { href: "/llms", label: "LLMs y prompting" },
       { href: "/papers", label: "Papers explicados" },
       { href: "/agents", label: "Anatomía de un agente" },
       { href: "/about", label: "Acerca de" },
