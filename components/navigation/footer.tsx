@@ -31,6 +31,7 @@ const columns = [
       { href: "/llms", label: "LLMs y prompting" },
       { href: "/papers", label: "Papers explicados" },
       { href: "/agents", label: "Anatomía de un agente" },
+      { href: "/workflows", label: "Anatomía de un workflow" },
       { href: "/about", label: "Acerca de" },
     ],
   },

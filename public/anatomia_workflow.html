@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Anatomía de un workflow · AI Atlas</title>
+<meta name="description" content="Experiencia 3D: qué es un workflow explicado con un sistema de estaciones conectadas. Disparador, pasos con datos, decisiones, controles y resultado, con un mismo ejemplo de principio a fin.">
+<meta name="theme-color" content="#020407">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════════════════════
+   TOKENS — mismos que anatomia_agente_ia.html (identidad AI Atlas · Recursos)
+   ════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg0:#020407; --bg1:#05080D; --bg2:#080D14;
+  --cyan:#5DEBFF; --blue:#4A8DFF; --purple:#916CFF; --green:#55E6A5; --amber:#FFB84D; --red:#FF5D5D; --violet:#B59BFF; --steel:#DCE8F5;
+  --fg:#EEF3F8; --muted:#A3AEBD; --faint:#5F6B7B; --line:rgba(255,255,255,.12);
+  --u:min(1vw,1.7778vh);
+  --fs-body:max(17px,calc(var(--u)*1.67));
+  --fs-small:max(14px,calc(var(--u)*1.22));
+  --fs-tiny:max(12px,calc(var(--u)*.86));
+  --fs-h2:max(30px,calc(var(--u)*3.6));
+  --fs-h1:max(38px,calc(var(--u)*5));
+  --pad:max(20px,calc(var(--u)*6.2));
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --font:"SF Pro Display","Inter","Geist","Helvetica Neue",system-ui,sans-serif;
+  --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg0);color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{background:var(--bg0);overflow-x:hidden}
+::selection{background:rgba(93,235,255,.3)}
+
+#gl{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0;outline:none}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:1;background:
+  radial-gradient(120% 90% at 64% 48%,transparent 45%,rgba(2,4,7,.55) 78%,rgba(2,4,7,.92) 100%)}
+.scroller{position:relative;z-index:0;pointer-events:none}
+.scroller > div{width:1px}
+
+/* ── Capas por escena ─────────────────────────────────────────────── */
+.layer{position:fixed;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:center;padding:var(--pad);
+  pointer-events:none;opacity:0;visibility:hidden;filter:blur(10px);transform:translateY(18px) scale(.995);
+  transition:opacity 1s var(--ease),filter 1s var(--ease),transform 1.1s var(--ease),visibility 0s linear 1.1s}
+/* Velo tras la columna de texto: en los acercamientos, el modelo no compite con la lectura */
+.layer:not(.center){background:linear-gradient(90deg,rgba(2,4,7,.9) 0,rgba(2,4,7,.72) calc(var(--pad) + var(--u)*36),transparent calc(var(--pad) + var(--u)*50))}
+.layer.active{opacity:1;visibility:visible;filter:none;transform:none;transition:opacity 1.1s var(--ease) .15s,filter 1.1s var(--ease) .15s,transform 1.2s var(--ease) .15s,visibility 0s}
+.col{max-width:calc(var(--u)*40);position:relative}
+.eyebrow{font-size:var(--fs-small);letter-spacing:.26em;text-transform:uppercase;font-weight:500;color:var(--c,var(--cyan));margin-bottom:calc(var(--u)*1.2)}
+.eyebrow::before{content:"";display:inline-block;width:calc(var(--u)*2.2);height:1px;background:currentColor;vertical-align:middle;margin-right:.8em;opacity:.7}
+h1,h2{font-weight:650;letter-spacing:-.035em;line-height:.98}
+h2{font-size:var(--fs-h2)}
+.lead{font-size:var(--fs-body);font-weight:300;line-height:1.28;color:#C9D3DF;margin-top:calc(var(--u)*1.4);letter-spacing:-.005em}
+.lead b{font-weight:600;color:var(--fg)}
+.lead.strong{color:var(--fg);font-weight:500}
+.hint{font-size:var(--fs-small);color:var(--muted);margin-top:calc(var(--u)*1.1);font-weight:400;letter-spacing:.01em;line-height:1.4}
+.accent{color:var(--c,var(--cyan))}
+.rv{opacity:0;transform:translateY(calc(var(--u)*.9));filter:blur(8px);transition:opacity .9s var(--ease),transform 1s var(--ease),filter .9s var(--ease)}
+.rv.on{opacity:1;transform:none;filter:none}
+.mono{font-family:var(--mono)}
+
+/* ── Cromo (marca, contador, navegación) ──────────────────────────── */
+.chrome{position:fixed;z-index:6;pointer-events:none}
+.brand{top:calc(var(--u)*2.2);left:var(--pad);font-size:var(--fs-tiny);letter-spacing:.32em;color:var(--muted);font-weight:500}
+.brand b{color:var(--fg);font-weight:600}
+.counter{bottom:calc(var(--u)*2.2);left:var(--pad);font-size:var(--fs-tiny);letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.counter b{color:var(--fg);font-weight:600}
+.keys{bottom:calc(var(--u)*2.2);right:var(--pad);font-size:var(--fs-tiny);color:var(--faint);letter-spacing:.12em}
+.keys kbd{font-family:var(--font);border:1px solid var(--line);border-radius:6px;padding:.1em .5em;margin:0 .15em;color:var(--muted)}
+.dots{right:calc(var(--u)*2.2);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:calc(var(--u)*.95);pointer-events:auto}
+.dots button{position:relative;width:calc(var(--u)*.6);height:calc(var(--u)*.6);min-width:8px;min-height:8px;border-radius:50%;border:0;background:rgba(255,255,255,.22);cursor:pointer;transition:background .4s,transform .4s}
+.dots button.on{background:var(--cyan);transform:scale(1.35);box-shadow:0 0 12px rgba(93,235,255,.6)}
+.dots button span{position:absolute;right:calc(100% + 14px);top:50%;transform:translateY(-50%);white-space:nowrap;font-size:var(--fs-tiny);color:var(--fg);letter-spacing:.08em;opacity:0;transition:opacity .3s;pointer-events:none;background:rgba(5,8,13,.8);padding:.3em .7em;border-radius:6px}
+.dots button:hover span,.dots button:focus-visible span{opacity:1}
+button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+
+/* ── Intro ────────────────────────────────────────────────────────── */
+.mega{font-size:var(--fs-h1);font-weight:650;letter-spacing:-.045em;line-height:.95}
+.mask{display:block;overflow:hidden;padding-bottom:.06em}
+.mask > span{display:block;animation:rise 1.3s var(--ease) both}
+.mask + .mask > span{animation-delay:.15s}
+@keyframes rise{from{transform:translateY(105%)}to{transform:none}}
+.scroll-hint{position:absolute;left:50%;bottom:calc(var(--u)*3.2);transform:translateX(-50%);font-size:var(--fs-tiny);letter-spacing:.4em;color:var(--muted);text-align:center;white-space:nowrap}
+.scroll-hint i{display:block;margin:1.1em auto 0;width:1px;height:calc(var(--u)*4);background:linear-gradient(var(--cyan),transparent);animation:drip 2.4s var(--ease) infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ── Fórmula: disparador → pasos → decisiones y controles → resultado ─ */
+.chip{display:inline-flex;align-items:center;gap:.5em;font-size:var(--fs-small);font-weight:450;color:var(--fg);padding:.32em .85em;border-radius:999px;
+  border:1px solid var(--line);background:rgba(8,13,20,.6);backdrop-filter:blur(8px);white-space:nowrap}
+.formula{margin-top:calc(var(--u)*2);display:flex;flex-wrap:wrap;align-items:center;gap:calc(var(--u)*.55)}
+.formula .chip{color:var(--faint);transition:color .5s,border-color .5s,background .5s,box-shadow .5s}
+.formula .chip i{font-style:normal;font-family:var(--mono);font-size:.78em;color:inherit;opacity:.8}
+.formula .chip.lit{color:var(--fg);border-color:rgba(93,235,255,.5)}
+.formula .chip.cur{color:var(--bg0);background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 22px rgba(93,235,255,.4)}
+.formula b{color:var(--faint);font-weight:300;font-size:var(--fs-small)}
+.legend{display:none}
+
+/* ── Pasos con datos: recibe / entrega ────────────────────────────── */
+.io{list-style:none;margin-top:calc(var(--u)*1.8);display:flex;flex-direction:column;gap:calc(var(--u)*1)}
+.io li{border:1px solid var(--line);border-radius:14px;padding:calc(var(--u)*.9) calc(var(--u)*1.2);background:rgba(5,8,13,.7);backdrop-filter:blur(10px);
+  opacity:.45;transition:opacity .6s,border-color .6s,box-shadow .6s}
+.io li.cur{opacity:1;border-color:rgba(93,235,255,.55);box-shadow:0 0 26px rgba(93,235,255,.12)}
+.io li.seen{opacity:.8}
+.io h3{font-size:var(--fs-small);font-weight:600;letter-spacing:.04em;color:var(--fg)}
+.io h3 i{font-style:normal;font-family:var(--mono);color:var(--cyan);margin-right:.6em;font-weight:500}
+.io dl{display:grid;grid-template-columns:auto 1fr;gap:.25em 1em;margin-top:.5em;font-size:var(--fs-small);line-height:1.3}
+.io dt{font-size:var(--fs-tiny);letter-spacing:.22em;text-transform:uppercase;color:var(--muted);padding-top:.2em}
+.io dd{color:#D5DEE8}
+
+/* ── Decisión: dos caminos ─────────────────────────────────────────── */
+.branches{margin-top:calc(var(--u)*1.8);display:flex;flex-direction:column;gap:calc(var(--u)*.7);align-items:flex-start}
+.branches .chip{transition:opacity .6s,border-color .6s,box-shadow .6s}
+.branches .chip b{font-weight:650;letter-spacing:.12em}
+.branches .yes b{color:var(--green)} .branches .no b{color:var(--amber)}
+.branches.chosen-yes .yes{border-color:rgba(85,230,165,.6);box-shadow:0 0 22px rgba(85,230,165,.18)}
+.branches.chosen-yes .no{opacity:.45}
+
+/* ── Control ──────────────────────────────────────────────────────── */
+.alert{margin-top:calc(var(--u)*1.6);font-size:calc(var(--fs-h2)*.5);font-weight:650;letter-spacing:.06em;display:inline-flex;align-items:center;gap:.6em;color:var(--amber)}
+.alert i{flex:none;width:.55em;height:.55em;border-radius:2px;border-left:.16em solid currentColor;border-right:.16em solid currentColor}
+
+/* ── Resultado: repaso ─────────────────────────────────────────────── */
+.stmts{list-style:none;margin-top:calc(var(--u)*1.6);display:flex;flex-direction:column;gap:calc(var(--u)*.6)}
+.stmts li{font-size:var(--fs-small);font-weight:400;color:var(--faint);line-height:1.3;opacity:0;transform:translateX(-8px);transition:color .6s,transform .6s,opacity .6s}
+.stmts li b{font-weight:650;color:inherit}
+.stmts li.seen{opacity:1;transform:none;color:#8E9AAA}
+.stmts li.cur{opacity:1;transform:none;color:var(--fg)}
+.stmts li.cur b{color:var(--cyan)}
+
+/* ── Final ────────────────────────────────────────────────────────── */
+.layer.center{align-items:center;justify-content:flex-end;text-align:center}
+.fin{position:absolute;left:0;right:0;bottom:calc(var(--u)*8);padding:0 var(--pad)}
+.fin .big{font-size:calc(var(--fs-h2)*.95);font-weight:650;letter-spacing:-.035em;line-height:1.04}
+.fin .big span{color:var(--muted);font-weight:500}
+.fin .ttl{font-size:calc(var(--fs-h2)*.62);font-weight:600;letter-spacing:-.02em;line-height:1.15;max-width:34em;margin:0 auto}
+.fin .sub{font-size:var(--fs-small);color:var(--muted);margin-top:calc(var(--u)*1.2)}
+.fin .sig{font-size:var(--fs-small);letter-spacing:.5em;color:var(--muted);margin-top:calc(var(--u)*1.6)}
+
+/* ── Etiquetas proyectadas desde el modelo 3D ──────────────────────── */
+#labels{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;opacity:0;white-space:nowrap;will-change:transform;
+  font-size:var(--fs-tiny);color:var(--fg);padding:.38em .8em;border-radius:10px;border:1px solid color-mix(in srgb,var(--c,#fff) 45%,transparent);
+  background:rgba(5,8,13,.8);backdrop-filter:blur(8px)}
+.lbl i{display:block;font-style:normal;font-size:.8em;letter-spacing:.2em;color:var(--c);font-weight:600}
+.lbl b{display:block;font-weight:600;font-size:1.1em;letter-spacing:.01em;margin-top:.12em}
+.lbl.compact b{display:none}
+.lbl .stem{position:absolute;left:50%;top:100%;width:1px;height:0;background:linear-gradient(color-mix(in srgb,var(--c) 70%,transparent),transparent)}
+.lbl.below .stem{top:auto;bottom:100%;background:linear-gradient(transparent,color-mix(in srgb,var(--c) 70%,transparent))}
+.lbl.flag{border-radius:999px;font-weight:650;letter-spacing:.14em;color:var(--c);padding:.3em .85em}
+.lbl.tok{border-style:dashed;color:var(--fg);font-weight:500;letter-spacing:.03em}
+.lbl.tok.warn{--c:var(--amber);color:var(--amber);font-weight:600}
+
+/* ── Sin WebGL: narrativa completa en columna, con diagrama estático ── */
+.flat{display:none}
+.nogl{display:none;position:relative;z-index:9;margin:0 var(--pad) 24px;padding:1em 1.2em;font-size:var(--fs-tiny);color:var(--amber);border:1px solid rgba(255,184,77,.3);border-radius:12px;background:rgba(5,8,13,.9);letter-spacing:.04em}
+body.no-gl #gl,body.no-gl .vignette,body.no-gl #labels,body.no-gl .scroller,body.no-gl .dots,body.no-gl .keys,body.no-gl .counter,body.no-gl .scroll-hint{display:none}
+body.no-gl .nogl{display:block}
+body.no-gl .chrome{position:absolute}
+body.no-gl main{padding-top:calc(var(--u)*8)}
+body.no-gl .layer{position:relative;inset:auto;opacity:1;visibility:visible;filter:none;transform:none;padding-top:calc(var(--u)*5);padding-bottom:calc(var(--u)*5);border-top:1px solid var(--line)}
+body.no-gl .layer.center{display:block;text-align:left}
+body.no-gl .fin{position:static;padding:0;margin-top:1.2em}
+body.no-gl .rv{opacity:1;transform:none;filter:none}
+body.no-gl .io li,body.no-gl .stmts li{opacity:1;transform:none;color:#D5DEE8}
+body.no-gl .formula .chip{color:var(--fg)}
+body.no-gl .flat{display:block;margin-top:calc(var(--u)*2);width:100%;max-width:640px;height:auto}
+.flat text{font-family:var(--font);font-size:13px;fill:var(--fg);text-anchor:middle;dominant-baseline:central}
+.flat rect,.flat polygon{fill:rgba(8,13,20,.9);stroke:rgba(255,255,255,.3);stroke-width:1.2}
+.flat path{fill:none;stroke:rgba(93,235,255,.6);stroke-width:1.5}
+.flat path.dash{stroke:rgba(255,184,77,.7);stroke-dasharray:5 5}
+
+/* ── Móvil / vertical: modelo arriba, texto abajo ──────────────────── */
+@media (max-aspect-ratio:1/1){
+  :root{--u:min(1.9vw,1.1vh)}
+  .layer{justify-content:flex-end;padding-bottom:calc(var(--u)*9);background:linear-gradient(to top,rgba(2,4,7,.95) 34%,rgba(2,4,7,.62) 56%,transparent 70%)}
+  .layer.center{background:linear-gradient(to top,rgba(2,4,7,.9) 30%,transparent 55%)}
+  body.no-gl .layer{background:none}
+  .col{max-width:100%}
+  .dots,.keys{display:none}
+  .lbl{font-size:11px}
+  .no-portrait{display:none}
+  .legend{display:block;list-style:none;margin-top:calc(var(--u)*1.4);columns:2;column-gap:1.2em;font-size:var(--fs-tiny);color:var(--muted);line-height:1.55}
+  .legend i{font-style:normal;font-family:var(--mono);color:var(--cyan);margin-right:.4em}
+  .io li{padding:.6em .9em}
+  .io dl{grid-template-columns:1fr;gap:0}
+  .io dt{padding-top:.3em}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important}
+  .layer,.rv,.io li,.stmts li,.formula .chip{transition-duration:.25s!important}
+}
+.reduced *,.reduced *::before,.reduced *::after{animation-duration:.01ms!important;animation-iteration-count:1!important}
+.reduced .layer,.reduced .rv,.reduced .io li,.reduced .stmts li,.reduced .formula .chip{transition-duration:.25s!important}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+
+<canvas id="gl" aria-label="Modelo 3D de un workflow: siete estaciones conectadas por las que circula una ficha de datos" role="img"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div id="labels" aria-hidden="true"></div>
+<p class="nogl" id="nogl">Tu navegador no pudo iniciar el modelo 3D: se muestra la narrativa completa con un diagrama estático.</p>
+
+<!-- ═════════════════════════════ CAPAS NARRATIVAS ═════════════════════════════ -->
+<main>
+
+<!-- 0 · INTRO -->
+<section class="layer" data-scene="0">
+  <div class="col">
+    <h1 class="mega">
+      <span class="mask"><span>ANATOMÍA</span></span>
+      <span class="mask"><span>DE UN WORKFLOW</span></span>
+    </h1>
+    <p class="lead">Qué lo inicia, cómo pasan los datos entre sus pasos, para qué sirven las decisiones y los controles, y qué resultado produce.</p>
+  </div>
+  <div class="scroll-hint">DESLIZA PARA EXPLORAR<i></i></div>
+</section>
+
+<!-- 1 · VISTA GENERAL -->
+<section class="layer" data-scene="1">
+  <div class="col">
+    <p class="eyebrow">01 · Vista general</p>
+    <h2>¿Qué es un workflow?</h2>
+    <p class="lead">Un proceso definido mediante <b>pasos conectados</b>: tiene un inicio, acciones, decisiones y un resultado.</p>
+    <div class="formula rv" data-at="0.2" id="formula1">
+      <span class="chip"><i>1</i>Disparador</span><b>→</b><span class="chip"><i>2</i>Pasos con datos</span><b>→</b><span class="chip"><i>3</i>Decisiones y controles</span><b>→</b><span class="chip"><i>4</i>Resultado</span>
+    </div>
+    <p class="lead strong rv" data-at="0.62">Como la estructura está definida, <span class="accent">se puede repetir cada vez que llega un caso nuevo.</span></p>
+    <p class="hint rv no-portrait" data-at="0.62">Ejemplo de todo el recorrido: llega una solicitud, se registran sus datos, se comprueba si está completa y se resuelve.</p>
+    <ol class="legend rv" data-at="0">
+      <li><i>01</i>Llega una solicitud</li><li><i>02</i>Registrar datos</li><li><i>03</i>Comprobar información</li><li><i>04</i>¿Está completa?</li>
+      <li><i>05</i>Enviar al responsable</li><li><i>06</i>Solicitar completarla</li><li><i>07</i>Registrar el resultado</li>
+    </ol>
+    <svg class="flat" viewBox="0 0 640 230" role="img" aria-label="Diagrama: llega una solicitud, registrar datos, comprobar información, decisión ¿está completa?; sí: enviar al responsable; no: solicitar completarla; ambos terminan en registrar el resultado">
+      <path d="M92 60H118M218 60H244M344 60H366"/><path d="M430 60C450 60,450 30,468 30"/><path class="dash" d="M430 60C450 60,450 150,468 150"/>
+      <path d="M560 42C580 42,590 100,560 196"/><path class="dash" d="M560 150C575 150,575 190,560 196"/>
+      <rect x="4" y="38" width="88" height="44" rx="22"/><text x="48" y="60">Solicitud</text>
+      <rect x="118" y="38" width="100" height="44" rx="8"/><text x="168" y="60">Registrar</text>
+      <rect x="244" y="38" width="100" height="44" rx="8"/><text x="294" y="60">Comprobar</text>
+      <polygon points="398,26 432,60 398,94 364,60"/><text x="398" y="60">¿?</text>
+      <rect x="468" y="10" width="140" height="40" rx="8"/><text x="538" y="30">Sí · al responsable</text>
+      <rect x="468" y="130" width="140" height="40" rx="8"/><text x="538" y="150">No · pedir lo que falta</text>
+      <rect x="440" y="182" width="120" height="40" rx="20"/><text x="500" y="202">Resultado</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 2 · DISPARADOR -->
+<section class="layer" data-scene="2" style="--c:var(--blue)">
+  <div class="col">
+    <p class="eyebrow">02 · Disparador</p>
+    <h2>El disparador inicia el proceso</h2>
+    <p class="lead">Algo ocurre y el workflow arranca. En el ejemplo: <b>llega una solicitud</b>.</p>
+    <p class="hint rv" data-at="0.45">La señal entra por el inicio y activa la primera estación.</p>
+    <p class="hint rv" data-at="0.75">Un disparador puede ser un formulario enviado, un correo, una hora programada o una persona que lo inicia a mano. Sin disparador, el proceso espera.</p>
+  </div>
+</section>
+
+<!-- 3 · PASOS CON DATOS -->
+<section class="layer" data-scene="3">
+  <div class="col">
+    <p class="eyebrow">03 · Pasos con datos</p>
+    <h2>Cada paso recibe algo y entrega algo</h2>
+    <ol class="io" id="io">
+      <li>
+        <h3><i>02</i>Registrar datos</h3>
+        <dl><dt>Recibe</dt><dd>La solicitud tal como llegó.</dd><dt>Entrega</dt><dd>Una ficha con tres campos: asunto, detalle y adjunto.</dd></dl>
+      </li>
+      <li>
+        <h3><i>03</i>Comprobar información</h3>
+        <dl><dt>Recibe</dt><dd>La ficha.</dd><dt>Entrega</dt><dd>La misma ficha con un estado: completa o incompleta.</dd></dl>
+      </li>
+    </ol>
+    <p class="lead strong rv" data-at="0.64">La salida de un paso <span class="accent">es la entrada del siguiente.</span></p>
+  </div>
+</section>
+
+<!-- 4 · DECISIONES -->
+<section class="layer" data-scene="4" style="--c:var(--purple)">
+  <div class="col">
+    <p class="eyebrow">04 · Decisiones</p>
+    <h2>Una decisión elige el camino</h2>
+    <p class="lead">La condición: <b>¿la información está completa?</b></p>
+    <div class="branches rv" data-at="0.2" id="branches">
+      <span class="chip yes"><b>SÍ</b> → enviar al responsable</span>
+      <span class="chip no"><b>NO</b> → solicitar que se complete</span>
+    </div>
+    <p class="lead rv" data-at="0.78">Esta solicitud está completa: <span class="accent" style="--c:var(--green)">se envía al responsable.</span></p>
+    <p class="hint rv" data-at="0.78">La regla se define antes. Así, dos solicitudes que cumplen la misma condición siguen el mismo camino.</p>
+  </div>
+</section>
+
+<!-- 5 · CONTROLES -->
+<section class="layer" data-scene="5" style="--c:var(--amber)">
+  <div class="col">
+    <p class="eyebrow">05 · Controles</p>
+    <h2>Un control no deja pasar datos incompletos</h2>
+    <p class="lead">Llega otra solicitud. Al comprobarla, <b>falta el adjunto</b>.</p>
+    <p class="lead rv" data-at="0.5">La decisión la manda por el camino <b>NO</b>: no se envía al responsable.</p>
+    <p class="alert rv" data-at="0.72"><i></i>EN PAUSA · SE SOLICITA COMPLETAR</p>
+    <p class="hint rv" data-at="0.82">El proceso no sigue como si todo estuviera bien: se detiene y pide lo que falta. Cuando llega, la solicitud vuelve a entrar por el inicio.</p>
+    <p class="hint rv" data-at="0.82">Un control también puede ser la revisión de una persona antes de continuar.</p>
+  </div>
+</section>
+
+<!-- 6 · RESULTADO -->
+<section class="layer" data-scene="6" style="--c:var(--violet)">
+  <div class="col">
+    <p class="eyebrow">06 · Resultado</p>
+    <h2>El resultado queda registrado</h2>
+    <p class="lead">Cada solicitud termina con una salida clara: <b>enviada</b> o <b>en espera de información</b>.</p>
+    <ul class="stmts" id="stmts">
+      <li><b>El disparador</b> inicia el proceso: llegó una solicitud.</li>
+      <li><b>Los pasos</b> reciben datos y entregan datos: solicitud → ficha → ficha con estado.</li>
+      <li><b>La decisión</b> elige el camino según una condición: ¿está completa?</li>
+      <li><b>El control</b> detiene el avance y pide lo que falta.</li>
+      <li><b>El resultado</b> queda registrado, y el proceso está listo para la siguiente solicitud.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 7 · FINAL -->
+<section class="layer center" data-scene="7">
+  <div class="fin">
+    <p class="big rv" data-at="0" data-until="0.45">UN WORKFLOW NO ES UNA HERRAMIENTA.<br><span>ES UN PROCESO QUE SE PUEDE REPETIR.</span></p>
+  </div>
+  <div class="fin">
+    <div class="rv" data-at="0.45">
+      <p class="ttl">La herramienta cambia cómo se representa el proceso y quién ejecuta cada paso.</p>
+      <p class="sub">La estructura se mantiene: disparador → pasos con datos → decisiones y controles → resultado.</p>
+      <p class="sig">AI ATLAS</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- Scroll: espaciadores que dan duración a cada escena -->
+<div class="scroller" id="scroller" aria-hidden="true"></div>
+
+<!-- Cromo -->
+<div class="chrome brand"><b>AI ATLAS</b> · WORKFLOWS</div>
+<div class="chrome counter" id="counter"></div>
+<div class="chrome keys"><kbd>↑</kbd><kbd>↓</kbd> o <kbd>Espacio</kbd> para avanzar</div>
+<nav class="chrome dots" id="dots" aria-label="Etapas del recorrido"></nav>
+
+<!-- Vigilante: si three.js no carga, la narrativa se muestra completa sin el modelo -->
+<script>
+  window.__wfFallback = function (msg) {
+    if (window.__WF_OK === 'fallback') return;
+    window.__WF_OK = 'fallback';
+    document.body.classList.add('no-gl');
+    if (msg) document.getElementById('nogl').textContent = msg;
+    document.querySelectorAll('.layer').forEach(function (l) { l.classList.add('active'); });
+  };
+  setTimeout(function () {
+    if (!window.__WF_OK) window.__wfFallback('No se pudieron cargar las librerías 3D (revisa tu conexión). Se muestra la narrativa completa con un diagrama estático.');
+  }, 9000);
+</script>
+
+<script type="module">
+/* ══════════════════════════════════════════════════════════════════════
+   ANATOMÍA DE UN WORKFLOW — experiencia 3D (Three.js)
+   Misma familia visual que anatomia_agente_ia.html. Módulos:
+     Stage        renderer, cámara, luces, suelo, bloom
+     World        estaciones procedurales, rieles, fichas de datos
+     Particles    señales que viajan (disparador, solicitud de datos, registro)
+     CameraRig    encuadre por "ancho de mundo" → se adapta a escritorio y móvil
+     Scroll       espaciadores, progreso por escena, paradas y teclado
+     UI           capas HTML, revelados, etiquetas proyectadas
+   Todo el estado visual es una función del progreso del scroll: al subir,
+   el recorrido retrocede exactamente. Se renderiza solo cuando algo cambia.
+   Para editar la narrativa: SCENES (encuadre + estado por escena) y el HTML.
+   ══════════════════════════════════════════════════════════════════════ */
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const CONFIG = {
+  // Preferencia del sistema, o ?motion=reduced para presentarla o revisarla sin cambiar el sistema
+  reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).get('motion') === 'reduced',
+  lowPower: (navigator.hardwareConcurrency || 8) <= 4 || matchMedia('(pointer: coarse)').matches,
+  maxDpr: 1.75,
+};
+
+/* ─────────────────────────────── UTILIDADES ─────────────────────────── */
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const bump = (p, a, b, c, d) => smooth(a, b, p) * (1 - smooth(c, d, p));
+const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
+const HEX = { cyan: '#5DEBFF', blue: '#4A8DFF', purple: '#916CFF', green: '#55E6A5', amber: '#FFB84D', violet: '#B59BFF', steel: '#DCE8F5' };
+const col = (hex, k = 1) => new THREE.Color(hex).multiplyScalar(k);
+
+/* Amortiguación que además informa si algo sigue moviéndose (render bajo demanda) */
+let MOVING = 0;
+const damp = (a, b, l, dt) => { const v = lerp(a, b, 1 - Math.exp(-l * dt)); MOVING = Math.max(MOVING, Math.abs(b - v)); return Math.abs(b - v) < 1e-4 ? b : v; };
+
+/* ─────────────────────────── ESTACIONES DEL EJEMPLO ─────────────────────
+   Un único caso de principio a fin: llega una solicitud → se registran sus
+   datos → se comprueba si está completa → sí: al responsable / no: se pide
+   completarla → queda registrado el resultado.                             */
+const ST = {
+  // lift: altura extra de la etiqueta (alterna alturas para que no se encimen); below: etiqueta bajo la estación
+  T: { n: '01', kind: 'DISPARADOR',     name: 'Llega una solicitud',    pos: [-4.0, 0, 0],     h: 0.64, color: HEX.blue,   lift: 0 },
+  R: { n: '02', kind: 'PASO',           name: 'Registrar datos',        pos: [-2.5, 0, 0],     h: 1.0,  color: HEX.cyan,   lift: 0.75 },
+  C: { n: '03', kind: 'PASO · CONTROL', name: 'Comprobar información',  pos: [-1.0, 0, 0],     h: 0.52, color: HEX.steel,  lift: 0 },
+  D: { n: '04', kind: 'DECISIÓN',       name: '¿Está completa?',        pos: [0.5, 0, 0],      h: 1.42, color: HEX.purple, lift: 1.05 },
+  S: { n: '05', kind: 'PASO · SÍ',      name: 'Enviar al responsable',  pos: [2.2, 0, -1.25],  h: 0.92, color: HEX.green,  lift: -0.3 },
+  Q: { n: '06', kind: 'PASO · NO',      name: 'Solicitar completarla',  pos: [2.2, 0, 1.25],   h: 0.95, color: HEX.amber,  below: true },
+  O: { n: '07', kind: 'RESULTADO',      name: 'Registrar el resultado', pos: [3.9, 0, 0],      h: 0.98, color: HEX.violet, lift: 0.95 },
+};
+const KEYS = Object.keys(ST);
+const ROUTE_A = ['T', 'R', 'C', 'D', 'S', 'O'];   // solicitud completa
+const ROUTE_B = ['T', 'R', 'C', 'D', 'Q'];        // solicitud a la que le falta el adjunto
+const RAIL_Y = 0.14;
+const P = (k, y = RAIL_Y) => V(ST[k].pos[0], y, ST[k].pos[2]);
+const cubic = (a, b) => { const A = P(a), B = P(b), mx = (A.x + B.x) / 2; return new THREE.CubicBezierCurve3(A, V(mx, RAIL_Y, A.z), V(mx, RAIL_Y, B.z), B); };
+const SEG = {
+  'T-R': { curve: new THREE.LineCurve3(P('T'), P('R')), color: HEX.cyan },
+  'R-C': { curve: new THREE.LineCurve3(P('R'), P('C')), color: HEX.cyan },
+  'C-D': { curve: new THREE.LineCurve3(P('C'), P('D')), color: HEX.cyan },
+  'D-S': { curve: cubic('D', 'S'), color: HEX.green },
+  'D-Q': { curve: cubic('D', 'Q'), color: HEX.amber },
+  'S-O': { curve: cubic('S', 'O'), color: HEX.green },
+  'Q-O': { curve: cubic('Q', 'O'), color: HEX.violet, dashed: true },     // registro de "en espera"
+  'Q-T': { curve: new THREE.CatmullRomCurve3([P('Q'), V(1.0, RAIL_Y, 2.2), V(-1.5, RAIL_Y, 2.35), V(-3.6, RAIL_Y, 1.6), V(-4.0, RAIL_Y, 0.6)]), color: HEX.amber, dashed: true }, // vuelve a entrar
+};
+const SEG_KEYS = Object.keys(SEG);
+
+/* ══════════════════════════════════════════════════════════════════════
+   Stage
+   ══════════════════════════════════════════════════════════════════════ */
+class Stage {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    this.dpr = Math.min(window.devicePixelRatio || 1, CONFIG.lowPower ? 1.25 : CONFIG.maxDpr);
+    this.renderer.setPixelRatio(this.dpr);
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 0.9;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color('#020407');
+    this.scene.fog = new THREE.FogExp2('#020407', 0.035);
+    this.camera = new THREE.PerspectiveCamera(32, 1, 0.05, 90);
+
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this.scene.environmentIntensity = 0.24;
+    pmrem.dispose();
+
+    const key = new THREE.DirectionalLight('#dfe9ff', 1.9); key.position.set(-4, 6, 5);
+    const rim = new THREE.DirectionalLight('#5debff', 1.1); rim.position.set(3, 3, -6);
+    const fill = new THREE.DirectionalLight('#3b5a96', 0.5); fill.position.set(5, 2, 4);
+    this.scene.add(key, rim, fill);
+    this.buildFloor();
+
+    this.bloomOn = !CONFIG.lowPower;
+    this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(512, 512), 0.55, 0.5, 0.88);
+    this.composer.addPass(this.bloom);
+    this.composer.addPass(new OutputPass());
+
+    this.uPx = { value: 1000 };
+    this.resize();
+  }
+  buildFloor() {
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const g = c.getContext('2d'); const grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+    grd.addColorStop(0, '#fff'); grd.addColorStop(0.5, '#777'); grd.addColorStop(1, '#000');
+    g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(9, 96), new THREE.MeshStandardMaterial({ color: '#070b12', roughness: 0.35, metalness: 0.55, transparent: true, alphaMap: new THREE.CanvasTexture(c) }));
+    floor.rotation.x = -Math.PI / 2; this.scene.add(floor);
+    // Retícula de puntos (misma idea que .resource-grid-bg del sitio)
+    const pts = [];
+    for (let x = -7; x <= 7; x += 0.5) for (let z = -4.5; z <= 4.5; z += 0.5) if (Math.hypot(x / 7, z / 4.5) < 1) pts.push(x, 0.003, z);
+    const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    this.scene.add(new THREE.Points(pg, new THREE.PointsMaterial({ color: '#223044', size: 2, sizeAttenuation: false })));
+  }
+  resize() {
+    const w = innerWidth, h = innerHeight;
+    this.renderer.setSize(w, h, false);
+    this.composer.setPixelRatio(this.dpr);
+    this.composer.setSize(w, h);
+    this.camera.aspect = w / h;
+    this.w = w; this.h = h;
+    this.portrait = w / h < 1;
+  }
+  updatePx() { this.uPx.value = (this.h * this.dpr) / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2)); }
+  render() { if (this.bloomOn) this.composer.render(); else this.renderer.render(this.scene, this.camera); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   World — estaciones procedurales. Cada tipo tiene una forma distinta,
+   además de su color y su etiqueta: anillo (disparador), bandeja de fichas
+   (registrar), arco de control, rombo (decisión), flecha (enviar), prisma
+   con pausa (solicitar) y pila de registros (resultado).
+   ══════════════════════════════════════════════════════════════════════ */
+function glowTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'); const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.25, 'rgba(255,255,255,.5)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c);
+}
+const GLOW = glowTexture();
+
+class World {
+  constructor(stage) {
+    this.stage = stage; this.root = new THREE.Group(); stage.scene.add(this.root);
+    this.M = {
+      shell: new THREE.MeshPhysicalMaterial({ color: '#e7e6e1', roughness: 0.3, metalness: 0.05, clearcoat: 0.75, clearcoatRoughness: 0.22 }),
+      pearl: new THREE.MeshPhysicalMaterial({ color: '#b8bcc2', roughness: 0.36, metalness: 0.25, clearcoat: 0.45 }),
+      dark: new THREE.MeshStandardMaterial({ color: '#0b0c0e', roughness: 0.45, metalness: 0.35 }),
+      gloss: new THREE.MeshPhysicalMaterial({ color: '#07060c', roughness: 0.12, metalness: 0.25, clearcoat: 1, clearcoatRoughness: 0.04 }),
+      pad: new THREE.MeshBasicMaterial({ color: '#060a10' }),
+    };
+    this.st = {}; this.v = {};           // estaciones y valores visuales amortiguados
+    KEYS.forEach((k) => this.buildStation(k));
+    this.buildRails();
+    this.tokA = new Token(this, 'A'); this.tokB = new Token(this, 'B');
+  }
+  accent(hex) { const m = new THREE.MeshBasicMaterial({ color: col(hex), transparent: true }); m.userData.base = col(hex); return m; }
+  mesh(geo, mat, parent, [x = 0, y = 0, z = 0] = [], rot) { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); if (rot) m.rotation.set(...rot); parent.add(m); return m; }
+
+  buildStation(k) {
+    const d = ST[k], g = new THREE.Group(); g.position.set(d.pos[0], 0, d.pos[2]); this.root.add(g);
+    const A = this.accent(d.color), M = this.M, m = (geo, mat, p, r) => this.mesh(geo, mat, g, p, r);
+    const s = { g, A, anchor: V(d.pos[0], 0, d.pos[2]) };
+    // Base común: disco oscuro y anillo de color en el suelo
+    m(new THREE.CircleGeometry(0.58, 48), M.pad, [0, 0.004, 0], [-Math.PI / 2, 0, 0]);
+    m(new THREE.RingGeometry(0.58, 0.605, 64), A, [0, 0.006, 0], [-Math.PI / 2, 0, 0]);
+    let top = 1.3;
+    if (k === 'T') {            // Disparador: anillo-portal por el que entra la señal
+      m(new RoundedBoxGeometry(0.5, 0.12, 0.5, 2, 0.03), M.dark, [0, 0.06, 0]);
+      m(new THREE.CylinderGeometry(0.03, 0.03, 0.2, 12), M.dark, [0, 0.2, 0]);
+      m(new THREE.TorusGeometry(0.42, 0.05, 20, 72), M.shell, [0, 0.64, 0], [0, Math.PI / 2, 0]);
+      m(new THREE.TorusGeometry(0.35, 0.012, 8, 72), A, [0, 0.64, 0], [0, Math.PI / 2, 0]);
+      top = 1.25;
+    } else if (k === 'R') {     // Registrar: cuerpo con bandejas de fichas
+      m(new RoundedBoxGeometry(0.64, 0.46, 0.52, 4, 0.06), M.shell, [0, 0.23, 0]);
+      m(new RoundedBoxGeometry(0.66, 0.06, 0.54, 2, 0.02), M.dark, [0, 0.3, 0]);
+      m(new THREE.BoxGeometry(0.5, 0.018, 0.01), A, [0, 0.3, 0.276]);
+      [0.5, 0.555, 0.61].forEach((y) => m(new RoundedBoxGeometry(0.46, 0.03, 0.34, 2, 0.012), M.pearl, [0, y, 0]));
+      m(new THREE.BoxGeometry(0.3, 0.008, 0.02), A, [0, 0.63, 0.1]);
+      top = 1.45;
+    } else if (k === 'C') {     // Comprobar: arco de control con barrido de lectura
+      m(new RoundedBoxGeometry(0.3, 0.06, 0.92, 2, 0.02), M.dark, [0, 0.03, 0]);
+      for (const z of [-0.4, 0.4]) {
+        m(new RoundedBoxGeometry(0.1, 1.0, 0.1, 2, 0.03), M.shell, [0, 0.53, z]);
+        m(new THREE.BoxGeometry(0.02, 0.8, 0.02), A, [0, 0.53, z * 0.86]);
+      }
+      m(new RoundedBoxGeometry(0.12, 0.1, 0.92, 2, 0.03), M.shell, [0, 1.05, 0]);
+      s.scanMat = new THREE.MeshBasicMaterial({ color: col(HEX.green, 1.4), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+      s.scanPlane = m(new THREE.PlaneGeometry(0.72, 0.9), s.scanMat, [0, 0.53, 0], [0, Math.PI / 2, 0]);
+      s.scanLine = m(new THREE.BoxGeometry(0.03, 0.012, 0.72), s.scanMat, [0, 0.5, 0]);
+      top = 1.45;
+    } else if (k === 'D') {     // Decisión: rombo sobre pedestal
+      m(new THREE.CylinderGeometry(0.24, 0.3, 0.36, 32), M.dark, [0, 0.18, 0]);
+      m(new THREE.TorusGeometry(0.25, 0.012, 8, 48), A, [0, 0.37, 0], [Math.PI / 2, 0, 0]);
+      const oct = new THREE.OctahedronGeometry(0.34);
+      s.diamond = m(oct, M.gloss, [0, 0.82, 0]); s.diamond.scale.set(1, 1.3, 1);
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(oct), new THREE.LineBasicMaterial({ color: col(HEX.purple, 1.6), transparent: true }));
+      s.diamond.add(e); s.edgeMat = e.material;
+      top = 1.7;
+    } else if (k === 'S') {     // Enviar: cuerpo con flecha hacia el resultado
+      m(new RoundedBoxGeometry(0.56, 0.4, 0.46, 4, 0.06), M.shell, [0, 0.2, 0]);
+      m(new THREE.CylinderGeometry(0.035, 0.035, 0.3, 12), A, [-0.05, 0.56, 0], [0, 0, Math.PI / 2]);
+      m(new THREE.ConeGeometry(0.1, 0.18, 24), A, [0.18, 0.56, 0], [0, 0, -Math.PI / 2]);
+      top = 1.3;
+    } else if (k === 'Q') {     // Solicitar completar: prisma con símbolo de pausa
+      m(new THREE.CylinderGeometry(0.34, 0.36, 0.42, 6), M.shell, [0, 0.21, 0]);
+      m(new THREE.CylinderGeometry(0.3, 0.34, 0.05, 6), M.dark, [0, 0.445, 0]);
+      for (const x of [-0.075, 0.075]) m(new RoundedBoxGeometry(0.07, 0.26, 0.07, 2, 0.015), A, [x, 0.6, 0]);
+      s.haloMat = this.accent(HEX.amber); s.haloMat.opacity = 0;
+      s.halo = m(new THREE.TorusGeometry(0.5, 0.014, 8, 80), s.haloMat, [0, 0.02, 0], [Math.PI / 2, 0, 0]);
+      top = 1.3;
+    } else if (k === 'O') {     // Resultado: pila de registros; cada salida añade una entrada
+      [0.07, 0.22, 0.37].forEach((y) => m(new THREE.CylinderGeometry(0.36, 0.36, 0.13, 40), M.shell, [0, y, 0]));
+      [0.145, 0.295].forEach((y) => m(new THREE.TorusGeometry(0.362, 0.008, 6, 64), A, [0, y, 0], [Math.PI / 2, 0, 0]));
+      m(new THREE.CylinderGeometry(0.3, 0.36, 0.03, 40), M.dark, [0, 0.45, 0]);
+      s.entries = [0.5, 0.56].map((y, i) => {
+        const e = m(new RoundedBoxGeometry(0.5, 0.035, 0.3, 2, 0.012), this.accent(i ? HEX.amber : HEX.green), [0, y, 0]);
+        e.scale.setScalar(0.001); return e;
+      });
+      top = 1.4;
+    }
+    s.top = V(d.pos[0], d.below ? 0.02 : top - 0.08, d.pos[2]);
+    s.labelAt = d.below ? V(d.pos[0], 0, d.pos[2] + 0.62) : V(d.pos[0], top + (d.lift || 0), d.pos[2]);
+    this.st[k] = s;
+  }
+
+  buildRails() {
+    this.rails = {};
+    const dim = col('#1d2838');
+    for (const key of SEG_KEYS) {
+      const { curve, color, dashed } = SEG[key];
+      const mat = new THREE.MeshBasicMaterial({ color: dim.clone(), transparent: true });
+      const r = { mat, dim, lit: col(color, 1.5), v: 0 };
+      if (!dashed) {
+        this.root.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.016, 8, false), mat));
+        // Flecha fija a mitad del tramo: el sentido del flujo se lee sin animación
+        const cone = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.12, 16), mat);
+        cone.position.copy(curve.getPoint(0.5)); cone.quaternion.setFromUnitVectors(V(0, 1, 0), curve.getTangent(0.5).normalize());
+        this.root.add(cone);
+      } else {
+        // Tramo punteado: caminos de espera o de reingreso (distintos sin depender del color)
+        const n = Math.round(curve.getLength() / 0.16), inst = new THREE.InstancedMesh(new THREE.BoxGeometry(0.07, 0.02, 0.025), mat, n);
+        const o = new THREE.Object3D();
+        for (let i = 0; i < n; i++) {
+          const t = (i + 0.5) / n; o.position.copy(curve.getPointAt(t)); const tg = curve.getTangentAt(t);
+          o.rotation.set(0, Math.atan2(-tg.z, tg.x), 0); o.updateMatrix(); inst.setMatrixAt(i, o.matrix);
+        }
+        this.root.add(inst);
+      }
+      this.rails[key] = r;
+    }
+  }
+
+  /* Punto de una ruta según u (0 = primera estación, 1 = segunda…). Entre
+     estaciones la ficha baja al riel; sobre cada estación sube a su altura. */
+  routePoint(route, u, out) {
+    const k = clamp(Math.floor(u), 0, route.length - 2), f = clamp(u - k);
+    const a = route[k], b = route[k + 1];
+    SEG[`${a}-${b}`].curve.getPoint(f, out);
+    const ha = ST[a].h, hb = ST[b].h, mid = lerp(ha, hb, 0.5);
+    out.y = lerp(ha, hb, smooth(0, 1, f)) - Math.max(0, mid - 0.42) * Math.sin(Math.PI * f);
+    return out;
+  }
+
+  /* Aplica el estado de la escena (amortiguado, o directo con movimiento reducido) */
+  apply(st, dt, t) {
+    const L = CONFIG.reducedMotion ? 14 : 3.2, v = this.v;
+    const dv = (name, target, l = L) => { v[name] = damp(v[name] ?? target, target, l, dt); return v[name]; };
+    for (const k of KEYS) {
+      const s = this.st[k], hl = dv('hl' + k, st.hl[k] ?? st.hlAll ?? 0.3);
+      let boost = 0;
+      if (k === 'T') boost = dv('pulse', st.pulse || 0) * 1.4;
+      s.A.color.copy(s.A.userData.base).multiplyScalar(0.28 + 1.5 * hl + boost);
+    }
+    // Control: barrido de lectura sobre la ficha
+    const C = this.st.C, scan = dv('scan', st.scan || 0, 6), miss = st.scanMiss ? 1 : 0;
+    C.scanMat.color.copy(col(miss ? HEX.amber : HEX.green, 1.5)); C.scanMat.opacity = scan * 0.22;
+    C.scanLine.position.y = CONFIG.reducedMotion ? 0.53 : lerp(0.1, 0.95, (t * 0.9) % 1);
+    // Decisión: el rombo "evalúa" la condición
+    const D = this.st.D, ev = dv('eval', st.dEval || 0, 6);
+    D.edgeMat.color.copy(col(HEX.purple, 0.8 + ev * 2.2 + (v.hlD || 0) * 0.8));
+    // Pausa: halo en la estación "solicitar completarla"
+    const Q = this.st.Q, pause = dv('pause', st.pause || 0);
+    const beat = CONFIG.reducedMotion ? 0.6 : 0.5 + 0.5 * Math.sin(t * 2.4);
+    Q.haloMat.opacity = pause * (0.35 + 0.65 * beat); Q.halo.scale.setScalar(1 + pause * 0.12 * beat);
+    // Registro de resultados
+    this.st.O.entries.forEach((e, i) => e.scale.setScalar(Math.max(0.001, dv('led' + i, (st.ledger || 0) > i ? 1 : 0, 5))));
+    // Rieles
+    for (const key of SEG_KEYS) {
+      const r = this.rails[key], c = dv('rail' + key, st.conn[key] ?? st.connAll ?? 0);
+      r.mat.color.copy(r.dim).lerp(r.lit, c);
+    }
+    this.tokA.apply(st.A, dt, t); this.tokB.apply(st.B, dt, t);
+    return { ambient: !CONFIG.reducedMotion && (scan > 0.01 || pause > 0.01) };
+  }
+}
+
+/* Ficha de datos: tarjeta con tres campos (asunto, detalle, adjunto) */
+class Token {
+  constructor(world, id) {
+    this.world = world; this.id = id; this.route = id === 'A' ? ROUTE_A : ROUTE_B;
+    this.g = new THREE.Group(); world.root.add(this.g);
+    this.cardMat = new THREE.MeshStandardMaterial({ color: '#dfe7f1', roughness: 0.3, metalness: 0.1, emissive: '#5debff', emissiveIntensity: 0.12, transparent: true });
+    this.card = new THREE.Mesh(new RoundedBoxGeometry(0.36, 0.06, 0.26, 2, 0.02), this.cardMat); this.g.add(this.card);
+    this.glowMat = new THREE.SpriteMaterial({ map: GLOW, color: col(HEX.cyan, 1.2), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+    this.glow = new THREE.Sprite(this.glowMat); this.glow.scale.setScalar(0.8); this.g.add(this.glow);
+    this.fields = [-0.1, 0, 0.1].map((x) => {
+      const mat = new THREE.MeshBasicMaterial({ color: col(HEX.cyan, 1.3), transparent: true });
+      const m = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.05, 0.065), mat); m.position.set(x, 0.058, 0); m.scale.setScalar(0.001); this.g.add(m); return m;
+    });
+    // Campo faltante: contorno vacío en ámbar
+    this.missMat = new THREE.LineBasicMaterial({ color: col(HEX.amber, 1.8), transparent: true, opacity: 0 });
+    this.miss = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.07, 0.055, 0.07)), this.missMat);
+    this.miss.position.set(0.1, 0.06, 0); this.g.add(this.miss);
+    this.u = 0; this.pos = V(); this.g.visible = false;
+  }
+  apply(s, dt, t) {
+    const v = this.world.v, id = this.id, L = CONFIG.reducedMotion ? 14 : 3;
+    // Movimiento reducido: la ficha salta de estación en estación en lugar de deslizarse
+    const target = CONFIG.reducedMotion ? Math.round(s.u) : s.u;
+    this.u = damp(this.u, target, CONFIG.reducedMotion ? 40 : 2.6, dt);
+    const vis = v['vis' + id] = damp(v['vis' + id] ?? 0, s.vis, L, dt);
+    this.g.visible = vis > 0.01;
+    if (!this.g.visible) return;
+    this.world.routePoint(this.route, this.u, this.pos);
+    this.g.position.copy(this.pos);
+    this.g.rotation.y = CONFIG.reducedMotion ? 0 : Math.sin(t * 0.8 + (id === 'B' ? 2 : 0)) * 0.08;
+    this.cardMat.opacity = vis; this.glowMat.opacity = vis * (s.dim ? 0.25 : 0.7);
+    this.glowMat.color.copy(col(s.warn ? HEX.amber : s.ok ? HEX.green : HEX.cyan, 1.2));
+    const n = v['fields' + id] = damp(v['fields' + id] ?? 0, s.fields, L, dt);
+    this.fields.forEach((f, i) => {
+      f.scale.setScalar(Math.max(0.001, clamp(n - i) * vis));
+      f.material.color.copy(col(s.ok ? HEX.green : HEX.cyan, 1.3));
+    });
+    this.missMat.opacity = (s.miss ? 1 : 0) * vis;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Particles — cada partícula es una señal: la que dispara el proceso, la
+   petición de datos que vuelve al origen y el registro que viaja al final.
+   ══════════════════════════════════════════════════════════════════════ */
+const PART_VS = `
+attribute float aAlpha; attribute vec3 aColor; uniform float uPx; uniform float uSize; varying float vA; varying vec3 vC;
+void main(){ vec4 mv = modelViewMatrix*vec4(position,1.); gl_Position = projectionMatrix*mv;
+  vA = aAlpha; vC = aColor; gl_PointSize = uSize*uPx/max(.05,-mv.z); }`;
+const PART_FS = `
+varying float vA; varying vec3 vC; void main(){ float d = length(gl_PointCoord-.5); float a = smoothstep(.5,.0,d);
+  gl_FragColor = vec4(vC*(1.+a), a*a*vA); }`;
+class Particles {
+  constructor(stage, max = 260) {
+    this.max = CONFIG.lowPower ? 140 : max;
+    const g = new THREE.BufferGeometry();
+    this.pos = new Float32Array(this.max * 3); this.alpha = new Float32Array(this.max); this.color = new Float32Array(this.max * 3);
+    g.setAttribute('position', new THREE.BufferAttribute(this.pos, 3));
+    g.setAttribute('aAlpha', new THREE.BufferAttribute(this.alpha, 1));
+    g.setAttribute('aColor', new THREE.BufferAttribute(this.color, 3));
+    this.geo = g;
+    this.points = new THREE.Points(g, new THREE.ShaderMaterial({ uniforms: { uPx: stage.uPx, uSize: { value: 0.05 } }, vertexShader: PART_VS, fragmentShader: PART_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    this.points.frustumCulled = false; stage.scene.add(this.points);
+    this.parts = Array.from({ length: this.max }, () => ({ alive: false, t: 0, f: null }));
+    this.flows = {}; this.alive = 0;
+  }
+  add(name, curve, hex, { rate = 14, dur = 1.6, y = 0 } = {}) { this.flows[name] = { curve, y, color: col(hex, 1.5), rate, dur, w: 0, acc: 0 }; }
+  update(dt, weights) {
+    if (CONFIG.reducedMotion) { this.alive = 0; return; }   // sin señales en movimiento: las flechas fijas indican el sentido
+    for (const name in this.flows) {
+      const f = this.flows[name]; f.w = weights[name] || 0;
+      if (f.w > 0.02) {
+        f.acc += f.rate * f.w * dt * (CONFIG.lowPower ? 0.6 : 1);
+        while (f.acc >= 1) { f.acc -= 1; const p = this.parts.find((q) => !q.alive); if (!p) break; p.alive = true; p.t = 0; p.f = f; p.spd = 1 / (f.dur * (0.85 + Math.random() * 0.3)); }
+      }
+    }
+    const tmp = V(); let alive = 0;
+    this.parts.forEach((p, i) => {
+      if (!p.alive) { this.alpha[i] = 0; return; }
+      p.t += p.spd * dt;
+      if (p.t >= 1) { p.alive = false; this.alpha[i] = 0; return; }
+      alive++;
+      p.f.curve.getPointAt(p.t, tmp);
+      this.pos[i * 3] = tmp.x; this.pos[i * 3 + 1] = tmp.y + p.f.y; this.pos[i * 3 + 2] = tmp.z;
+      this.alpha[i] = Math.sin(Math.PI * p.t) * Math.max(p.f.w, 0.3);
+      this.color[i * 3] = p.f.color.r; this.color[i * 3 + 1] = p.f.color.g; this.color[i * 3 + 2] = p.f.color.b;
+    });
+    this.alive = alive;
+    ['position', 'aAlpha', 'aColor'].forEach((a) => { this.geo.attributes[a].needsUpdate = true; });
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CameraRig — cada encuadre dice qué ancho del mundo debe caber en pantalla.
+   En escritorio el modelo ocupa la derecha (texto a la izquierda); en vertical
+   ocupa la mitad superior (texto abajo). La distancia se calcula para que el
+   mismo encuadre funcione en cualquier proporción.
+   ══════════════════════════════════════════════════════════════════════ */
+const shot = (x, y, z, w, yaw = 0, pitch = 0.55, hk = 0.42, center = 0) => ({ tgt: [x, y, z], w, yaw, pitch, hk, center });
+const mixShot = (a, b, t) => ({ tgt: a.tgt.map((q, i) => lerp(q, b.tgt[i], t)), w: lerp(a.w, b.w, t), yaw: lerp(a.yaw, b.yaw, t), pitch: lerp(a.pitch, b.pitch, t), hk: lerp(a.hk, b.hk, t), center: lerp(a.center, b.center, t) });
+const OVER = shot(0.0, 0.5, 0.4, 9.6, 0, 0.62, 0.5);
+
+class CameraRig {
+  constructor(stage) {
+    this.stage = stage; this.cam = stage.camera;
+    this.c = { x: 0, y: 0.4, z: 0.4, w: 12, yaw: 0, pitch: 0.8, hk: 0.45, shift: 0, shiftY: 0, fov: 32, aw: 0.5, ah: 0.8 };
+    this.first = true;
+  }
+  update(s, dt) {
+    const S = this.stage, portrait = S.portrait, c = this.c;
+    const l = CONFIG.reducedMotion ? 9 : 1.7;
+    // Escritorio: modelo a la derecha del texto. Vertical (o escena centrada): modelo arriba, texto abajo.
+    const k = portrait ? 1 : s.center;
+    const T = { x: s.tgt[0], y: s.tgt[1], z: s.tgt[2], w: s.w, yaw: s.yaw, pitch: s.pitch, hk: s.hk,
+      shift: lerp(0.235, 0, k), shiftY: lerp(0, portrait ? 0.27 : 0.2, k), fov: portrait ? 42 : 32, aw: lerp(0.5, 0.92, k), ah: lerp(0.8, portrait ? 0.38 : 0.46, k) };
+    for (const k in T) c[k] = this.first ? T[k] : damp(c[k], T[k], l, dt);
+    this.first = false;
+    const tanV = Math.tan(THREE.MathUtils.degToRad(c.fov) / 2), tanH = tanV * (S.w / S.h);
+    const d = Math.max((c.w / 2) / (tanH * c.aw), (c.w * c.hk / 2) / (tanV * c.ah));
+    const cp = Math.cos(c.pitch);
+    this.cam.position.set(c.x + Math.sin(c.yaw) * cp * d, c.y + Math.sin(c.pitch) * d, c.z + Math.cos(c.yaw) * cp * d);
+    this.cam.lookAt(c.x, c.y, c.z);
+    this.cam.fov = c.fov;
+    this.cam.setViewOffset(S.w, S.h, -c.shift * S.w, c.shiftY * S.h, S.w, S.h);
+    this.cam.updateProjectionMatrix();
+    S.updatePx();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   GUION — p = progreso 0..1 dentro de la escena. Cada escena define todo el
+   estado que se ve, así que retroceder con el scroll deshace cada paso.
+   ══════════════════════════════════════════════════════════════════════ */
+const u = (from, to, a, b, p) => lerp(from, to, smooth(a, b, p));      // avance de la ficha entre dos progresos
+const TOK = (o = {}) => ({ u: 0, vis: 0, fields: 0, ok: false, miss: false, warn: false, dim: false, label: '', ...o });
+const DONE_A = TOK({ u: 5, vis: 1, fields: 3, ok: true, label: 'Registrada · enviada' });
+const WAIT_B = TOK({ u: 4, vis: 1, fields: 2, miss: true, warn: true, label: 'En espera · falta el adjunto' });
+const FORMULA_AT = [0.22, 0.32, 0.42, 0.52];
+const FORMULA_HL = [['T'], ['R', 'C', 'S', 'Q'], ['D', 'C'], ['O']];
+const IO_AT = [0.04, 0.34];
+const STMT_AT = (k) => 0.5 + k * 0.09;
+
+const SCENES = [
+  { name: 'Inicio', len: 1.1, stops: [0],
+    shot: () => shot(0.05, 0.3, 0.45, 11.5, -0.25, 0.9, 0.5),
+    state: () => ({ hlAll: 0.18, labels: {} }) },
+
+  { name: 'Vista general', len: 2.4, stops: [0.05, 0.3, 0.62],
+    shot: (p) => mixShot(shot(0.05, 0.4, 0.45, 11.2, -0.12, 0.72, 0.46), OVER, smooth(0, 0.5, p)),
+    state: (p) => {
+      let k = -1; FORMULA_AT.forEach((a, i) => { if (p >= a) k = i; });
+      const all = p >= 0.62, hl = {};
+      if (k >= 0 && !all) FORMULA_HL[k].forEach((s) => { hl[s] = 1; });
+      return { hl, hlAll: all ? 0.85 : 0.3, connAll: all ? 0.55 : 0.12, formula: k, labels: { st: smooth(0.02, 0.12, p) } };
+    } },
+
+  { name: 'Disparador', len: 2.4, stops: [0.05, 0.5, 0.82],
+    shot: (p) => mixShot(shot(-3.9, 0.5, 0.1, 3.6, 0.5, 0.3, 0.55), shot(-3.4, 0.45, 0.1, 4.6, 0.35, 0.36, 0.5), smooth(0.6, 0.85, p)),
+    state: (p) => ({
+      hl: { T: 1, R: smooth(0.7, 0.8, p) }, hlAll: 0.16, pulse: bump(p, 0.44, 0.5, 0.62, 0.9),
+      conn: { 'T-R': smooth(0.7, 0.8, p) },
+      A: TOK({ vis: smooth(0.48, 0.55, p), label: 'Solicitud nueva' }),
+      flows: { sig: bump(p, 0.12, 0.2, 0.44, 0.5), tr: smooth(0.72, 0.8, p) },
+      labels: { st: 1, tokA: smooth(0.52, 0.58, p) } }) },
+
+  { name: 'Pasos con datos', len: 3.4, stops: [0.04, 0.34, 0.66],
+    shot: (p, st) => { const x = lerp(-4.0, 0.5, st.A.u / 3); return shot(x + 0.5, 0.5, 0.1, 4.2, 0.3, 0.42, 0.5); },
+    state: (p) => {
+      const au = u(0, 1, 0.05, 0.22, p) + u(0, 1, 0.36, 0.5, p) + u(0, 0.6, 0.68, 0.88, p);
+      const fields = 3 * smooth(0.22, 0.3, p), ok = p >= 0.58;
+      const row = p >= IO_AT[1] ? 1 : 0;
+      return {
+        hl: row === 0 ? { R: 1, T: 0.5 } : { C: 1, R: 0.5, D: smooth(0.66, 0.8, p) }, hlAll: 0.16,
+        conn: { 'T-R': 1, 'R-C': smooth(0.32, 0.4, p), 'C-D': smooth(0.64, 0.72, p) },
+        A: TOK({ u: au, vis: 1, fields, ok, label: p < 0.22 ? 'Solicitud nueva' : ok ? 'Ficha · estado: completa' : 'Ficha · 3 campos' }),
+        scan: bump(p, 0.48, 0.52, 0.58, 0.62), io: row, labels: { st: 1, tokA: 1 } };
+    } },
+
+  { name: 'Decisiones', len: 2.8, stops: [0.05, 0.42, 0.8],
+    shot: (p) => mixShot(shot(0.8, 0.5, -0.1, 5.0, 0, 0.8, 0.5), shot(1.5, 0.5, -0.45, 5.2, -0.2, 0.7, 0.5), smooth(0.5, 0.8, p)),
+    state: (p) => {
+      const chosen = p >= 0.42;
+      return {
+        hl: { D: 1, S: chosen ? smooth(0.6, 0.78, p) : 0.3, Q: 0.3, C: 0.4 }, hlAll: 0.16, dEval: bump(p, 0.2, 0.28, 0.4, 0.46),
+        conn: { 'T-R': 0.5, 'R-C': 0.5, 'C-D': 1, 'D-S': chosen ? smooth(0.42, 0.48, p) : 0, 'D-Q': 0 },
+        A: TOK({ u: u(2.6, 3, 0.04, 0.2, p) + u(0, 1, 0.48, 0.78, p), vis: 1, fields: 3, ok: true,
+          label: p < 0.2 ? 'Ficha · estado: completa' : !chosen ? '¿Completa? → evaluando' : p < 0.78 ? 'Camino: SÍ' : 'Enviada al responsable' }),
+        branch: chosen ? 'yes' : '', labels: { st: 1, tokA: 1, br: smooth(0.14, 0.22, p) } };
+    } },
+
+  { name: 'Controles', len: 3.4, stops: [0.04, 0.4, 0.62, 0.84],
+    shot: (p, st) => {
+      const x = lerp(-4.0, 0.5, Math.min(st.B.u, 3) / 3);
+      const follow = shot(x + 0.6, 0.5, 0.2, 4.6, 0.3, 0.45, 0.5);
+      const fork = shot(1.3, 0.5, 0.6, 5.2, 0.2, 0.62, 0.5), wide = shot(-0.2, 0.3, 1.0, 9.8, 0.05, 0.74, 0.46);
+      return p < 0.5 ? follow : p < 0.76 ? mixShot(follow, fork, smooth(0.5, 0.6, p)) : mixShot(fork, wide, smooth(0.76, 0.86, p));
+    },
+    state: (p) => {
+      const bu = u(0, 2, 0.06, 0.34, p) + u(0, 1, 0.48, 0.56, p) + u(0, 1, 0.58, 0.72, p);
+      const found = p >= 0.44, label = p < 0.14 ? 'Otra solicitud nueva' : !found ? 'Ficha · 2 de 3 campos' : p < 0.58 ? 'Falta: adjunto' : p < 0.72 ? 'Camino: NO' : 'En espera · se pidió completar';
+      return {
+        hl: { C: bump(p, 0.3, 0.36, 0.5, 0.56), D: bump(p, 0.46, 0.5, 0.64, 0.7), Q: smooth(0.6, 0.7, p), S: 0.25, T: smooth(0.8, 0.86, p) * 0.7 }, hlAll: 0.16,
+        conn: { 'T-R': 0.5, 'R-C': 0.5, 'C-D': 0.5, 'D-S': 0.06, 'D-Q': smooth(0.56, 0.62, p), 'Q-T': smooth(0.8, 0.86, p) },
+        A: TOK({ u: 4, vis: 0.55, fields: 3, ok: true, dim: true }),
+        B: TOK({ u: bu, vis: smooth(0.02, 0.08, p), fields: 2 * smooth(0.14, 0.22, p), miss: found, warn: found, label }),
+        scan: bump(p, 0.36, 0.4, 0.46, 0.5), scanMiss: true, pause: smooth(0.72, 0.78, p),
+        flows: { ask: smooth(0.8, 0.86, p) },
+        labels: { st: 1, tokB: smooth(0.04, 0.1, p), br: bump(p, 0.46, 0.52, 0.74, 0.8), ask: smooth(0.82, 0.88, p) } };
+    } },
+
+  { name: 'Resultado', len: 3.4, stops: [0.05, 0.3, 0.5, 0.68, 0.9],
+    shot: (p) => mixShot(shot(3.2, 0.5, 0.1, 4.6, -0.35, 0.45, 0.55), OVER, smooth(0.5, 0.7, p)),
+    state: (p) => {
+      const led = (p >= 0.26 ? 1 : 0) + (p >= 0.46 ? 1 : 0);
+      return {
+        hl: { O: 1, S: p < 0.3 ? 0.7 : 0.35, Q: bump(p, 0.28, 0.32, 0.46, 0.5) + 0.35 }, hlAll: lerp(0.2, 0.8, smooth(0.5, 0.7, p)),
+        conn: { 'S-O': smooth(0.04, 0.1, p), 'Q-O': bump(p, 0.28, 0.34, 0.5, 0.6), 'Q-T': 0.35 }, connAll: smooth(0.5, 0.7, p) * 0.5,
+        A: TOK({ u: u(4, 5, 0.05, 0.24, p), vis: 1, fields: 3, ok: true, label: p < 0.26 ? 'Enviada al responsable' : DONE_A.label }),
+        B: { ...WAIT_B }, pause: 1, ledger: led, flows: { rec: bump(p, 0.28, 0.32, 0.44, 0.48) },
+        labels: { st: 1, tokA: 1 - smooth(0.56, 0.62, p), tokB: 1 - smooth(0.56, 0.62, p), led: smooth(0.24, 0.3, p) } };
+    } },
+
+  { name: 'Final', len: 2.2, stops: [0.1, 0.5],
+    shot: (p) => mixShot({ ...OVER, center: 1 }, shot(0.05, 0.4, 0.45, 11.4, -0.18, 0.78, 0.46, 1), smooth(0, 1, p)),
+    state: () => ({ hlAll: 0.7, connAll: 0.45, A: { ...DONE_A }, B: { ...WAIT_B }, pause: 1, ledger: 2, labels: { st: 0.9, led: 1 } }) },
+];
+
+/* Estado completo con valores por defecto */
+function resolve(sc, p) {
+  const s = sc.state(p);
+  return { hl: {}, conn: {}, flows: {}, labels: {}, ...s, A: s.A || TOK(), B: s.B || TOK() };
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   UI — capas, revelados, etiquetas proyectadas, contador y navegación
+   ══════════════════════════════════════════════════════════════════════ */
+class UI {
+  constructor(app) {
+    this.app = app;
+    this.layers = [...document.querySelectorAll('.layer')];
+    this.labelsEl = document.getElementById('labels');
+    this.labels = [];
+    this.formula = [...document.querySelectorAll('#formula1 .chip')];
+    this.io = [...document.querySelectorAll('#io li')];
+    this.stmts = [...document.querySelectorAll('#stmts li')];
+    this.branches = document.getElementById('branches');
+    this.buildDots(); this.buildLabels();
+  }
+  buildDots() {
+    const nav = document.getElementById('dots');
+    this.dots = SCENES.map((s, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `Ir a: ${s.name}`);
+      b.innerHTML = `<span>${String(i).padStart(2, '0')} · ${s.name}</span>`;
+      b.addEventListener('click', () => this.app.scroll.goScene(i)); nav.appendChild(b); return b;
+    });
+  }
+  addLabel(group, getPos, html, { color = '#EEF3F8', cls = '', station = null } = {}) {
+    const el = document.createElement('div'); el.className = 'lbl ' + cls; el.innerHTML = html; el.style.setProperty('--c', color);
+    this.labelsEl.appendChild(el); const L = { el, group, getPos, station, op: -1, text: html }; this.labels.push(L); return L;
+  }
+  buildLabels() {
+    const W = this.app.world;
+    for (const k of KEYS) {
+      const d = ST[k];
+      const L = this.addLabel('st', (o) => o.copy(W.st[k].labelAt), `<i>${d.n} · ${d.kind}</i><b>${d.name}</b><span class="stem"></span>`, { color: d.color, station: k, cls: d.below ? 'below' : '' });
+      L.stem = L.el.querySelector('.stem'); L.below = !!d.below;
+    }
+    const mid = (key, t, y) => (o) => SEG[key].curve.getPoint(t, o).setY(y);
+    this.addLabel('br', mid('D-S', 0.55, 0.45), 'SÍ · COMPLETA', { color: HEX.green, cls: 'flag' });
+    this.addLabel('br', mid('D-Q', 0.55, 0.45), 'NO · FALTA INFORMACIÓN', { color: HEX.amber, cls: 'flag' });
+    this.addLabel('ask', mid('Q-T', 0.5, 0.3), 'SE PIDE COMPLETAR · VUELVE A ENTRAR', { color: HEX.amber, cls: 'flag' });
+    this.tokA = this.addLabel('tokA', (o) => o.copy(W.tokA.pos).setY(W.tokA.pos.y + 0.34), '', { color: HEX.cyan, cls: 'tok' });
+    this.tokB = this.addLabel('tokB', (o) => o.copy(W.tokB.pos).setY(W.tokB.pos.y + 0.34), '', { color: HEX.cyan, cls: 'tok' });
+    this.led = this.addLabel('led', (o) => o.copy(W.st.O.labelAt).setY(0.62).add(V(0, 0, 0.75)), '', { color: HEX.violet, cls: 'flag' });
+  }
+  setText(L, text) { if (L.text !== text) { L.text = text; L.el.textContent = text; L.half = undefined; } }
+  updateLabels(st) {
+    const cam = this.app.stage.camera, w = innerWidth, h = innerHeight, tmp = V(), portrait = this.app.stage.portrait, W = this.app.world;
+    this.setText(this.tokA, st.A.label); this.setText(this.tokB, st.B.label);
+    this.tokA.el.classList.toggle('warn', !!st.A.warn); this.tokB.el.classList.toggle('warn', !!st.B.warn);
+    this.setText(this.led, st.ledger ? `REGISTRO · ${st.ledger >= 1 ? '1 enviada' : ''}${st.ledger >= 2 ? ' · 1 en espera' : ''}` : '');
+    for (const L of this.labels) {
+      let v = st.labels[L.group] || 0;
+      if (L.station) {
+        const hl = W.v['hl' + L.station] ?? 0.3;
+        v *= 0.15 + 0.85 * clamp(hl);
+        // En vertical, las estaciones que no están en foco muestran solo número y tipo
+        const compact = portrait && hl < 0.95;
+        if (compact !== L.compact) { L.compact = compact; L.el.classList.toggle('compact', compact); L.half = undefined; }
+      }
+      if ((L === this.tokA || L === this.tokB || L === this.led) && !L.text) v = 0;
+      if (v < 0.005 && L.op === 0) continue;
+      L.getPos(tmp); tmp.project(cam);
+      const behind = tmp.z > 1 || tmp.z < -1;
+      const y = (-tmp.y * 0.5 + 0.5) * h;
+      // En vertical el texto ocupa la parte baja: las etiquetas que caerían detrás de él se desvanecen
+      const fade = portrait ? 1 - smooth(0.4 * h, 0.5 * h, y) : 1;
+      const op = behind ? 0 : Math.round(v * fade * 100) / 100;
+      if (op !== L.op) { L.el.style.opacity = op; L.op = op; }
+      if (L.half === undefined) L.half = L.el.offsetWidth / 2;
+      const x = clamp((tmp.x * 0.5 + 0.5) * w, 8 + L.half, w - 8 - L.half);
+      L.el.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) translate(-50%,${L.below ? '0' : '-100%'})`;
+      if (L.stem) {   // línea que une la etiqueta con su estación
+        tmp.copy(W.st[L.station].top).project(cam);
+        const sy = (-tmp.y * 0.5 + 0.5) * h;
+        L.stem.style.height = `${Math.max(0, L.below ? y - sy : sy - y).toFixed(1)}px`;
+      }
+    }
+  }
+  /* Capas y revelados por progreso */
+  update(i, p, st) {
+    if (this.activeIdx !== i) {
+      this.layers.forEach((l) => l.classList.toggle('active', +l.dataset.scene === i));
+      this.dots.forEach((d, k) => { d.classList.toggle('on', k === i); d.toggleAttribute('aria-current', k === i); });
+      document.getElementById('counter').innerHTML = `<b>${String(i).padStart(2, '0')}</b> / ${SCENES.length - 1} · ${SCENES[i].name}`;
+      this.activeIdx = i;
+    }
+    const layer = this.layers[i];
+    if (layer) layer.querySelectorAll('[data-at]').forEach((el) => {
+      el.classList.toggle('on', p >= +el.dataset.at - 0.001 && (el.dataset.until === undefined || p < +el.dataset.until));
+    });
+    if (i === 1) this.formula.forEach((c, n) => { c.classList.toggle('lit', n <= st.formula || p >= 0.62); c.classList.toggle('cur', n === st.formula && p < 0.62); });
+    if (i === 3) this.io.forEach((li, n) => { li.classList.toggle('cur', n === st.io); li.classList.toggle('seen', n < st.io); });
+    if (i === 4) this.branches.classList.toggle('chosen-yes', st.branch === 'yes');
+    if (i === 6) {
+      let k = -1; for (let n = 0; n < 5; n++) if (p >= STMT_AT(n)) k = n;
+      this.stmts.forEach((li, n) => { li.classList.toggle('seen', n < k); li.classList.toggle('cur', n === k); });
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Scroll — espaciadores, progreso por escena, paradas y teclado
+   ══════════════════════════════════════════════════════════════════════ */
+class Scroll {
+  constructor(app) {
+    this.app = app; this.index = 0; this.progress = 0;
+    const root = document.getElementById('scroller');
+    this.spacers = SCENES.map((s) => { const d = document.createElement('div'); d.style.height = `${s.len * 100}vh`; root.appendChild(d); return d; });
+    const tail = document.createElement('div'); tail.style.height = '100vh'; root.appendChild(tail);
+    this.measure();
+    addEventListener('scroll', () => { this.read(); app.kick(); }, { passive: true });
+    addEventListener('resize', () => { this.measure(); this.read(); });
+    addEventListener('keydown', (e) => this.onKey(e));
+    this.read();
+  }
+  measure() { this.tops = this.spacers.map((d) => d.getBoundingClientRect().top + scrollY); this.hs = this.spacers.map((d) => d.offsetHeight); }
+  read() {
+    const y = scrollY; let i = 0;
+    while (i < SCENES.length - 1 && y >= this.tops[i] + this.hs[i]) i++;
+    this.index = i; this.progress = clamp((y - this.tops[i]) / this.hs[i]);
+  }
+  stopPositions() {
+    const out = []; SCENES.forEach((s, i) => s.stops.forEach((st) => out.push(Math.round(this.tops[i] + st * this.hs[i])))); return out.sort((a, b) => a - b);
+  }
+  to(y) { window.scrollTo({ top: y, behavior: CONFIG.reducedMotion ? 'auto' : 'smooth' }); }
+  goScene(i) { this.to(Math.round(this.tops[i] + SCENES[i].stops[0] * this.hs[i])); }
+  onKey(e) {
+    if (e.target.closest && e.target.closest('input,textarea,button')) { if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return; }
+    const next = ['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key) && !e.shiftKey;
+    const prev = ['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key) || (e.key === ' ' && e.shiftKey);
+    if (!next && !prev) return;
+    e.preventDefault();
+    const y = scrollY, stops = this.stopPositions();
+    const target = next ? stops.find((s) => s > y + 6) : [...stops].reverse().find((s) => s < y - 6);
+    this.to(target ?? (next ? y : 0));
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   APP — render bajo demanda: solo se dibuja mientras algo se mueve, y se
+   pausa si la pestaña está oculta o la experiencia no está en pantalla.
+   ══════════════════════════════════════════════════════════════════════ */
+class App {
+  constructor() {
+    this.stage = new Stage(document.getElementById('gl'));
+    this.world = new World(this.stage);
+    this.particles = new Particles(this.stage);
+    this.rig = new CameraRig(this.stage);
+    const up = (c, y) => ({ getPointAt: (t, o) => c.getPointAt(t, o).setY(y) });
+    this.particles.add('sig', new THREE.LineCurve3(V(-7.0, 0.64, 0), V(-4.0, 0.64, 0)), HEX.blue, { rate: 26, dur: 1.2 });
+    this.particles.add('tr', up(SEG['T-R'].curve, 0.3), HEX.cyan, { rate: 8, dur: 1.4 });
+    this.particles.add('ask', up(SEG['Q-T'].curve, 0.24), HEX.amber, { rate: 10, dur: 3.2 });
+    this.particles.add('rec', up(SEG['Q-O'].curve, 0.24), HEX.violet, { rate: 16, dur: 1.4 });
+    this.ui = new UI(this);
+    this.scroll = new Scroll(this);
+    this.clock = new THREE.Clock(); this.time = 0;
+    this.visible = true; this.running = false;
+    this.perf = { acc: 0, n: 0, done: false };
+    document.addEventListener('visibilitychange', () => this.kick());
+    // Dentro de un iframe, la raíz implícita es la ventana principal: detecta si la experiencia salió de pantalla
+    new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; this.kick(); }).observe(this.stage.canvas);
+    addEventListener('resize', () => { this.stage.resize(); this.ui.labels.forEach((L) => { L.half = undefined; }); this.kick(); });
+    this.kick();
+    window.__WF_OK = true;
+  }
+  kick() {
+    if (this.running || !this.visible || document.hidden) return;
+    this.running = true; this.clock.getDelta();
+    requestAnimationFrame(() => this.frame());
+  }
+  frame() {
+    const busy = this.step(Math.min(this.clock.getDelta(), 0.05));
+    if (busy && this.visible && !document.hidden) requestAnimationFrame(() => this.frame());
+    else this.running = false;
+  }
+  /* Un cuadro: devuelve true mientras quede algo en movimiento */
+  step(dt) {
+    this.time += dt;
+    MOVING = 0;
+    const { index: i, progress: p } = this.scroll, sc = SCENES[i];
+    const st = resolve(sc, p);
+    const { ambient } = this.world.apply(st, dt, this.time);
+    this.rig.update(sc.shot(p, st), dt);
+    this.stage.scene.updateMatrixWorld();
+    this.particles.update(dt, st.flows);
+    this.ui.updateLabels(st);
+    this.ui.update(i, p, st);
+    this.stage.render();
+    this.adaptQuality(dt);
+    return MOVING > 1e-3 || ambient || this.particles.alive > 0;
+  }
+  /* Si el equipo no sostiene ~40 FPS mientras anima, se apaga el bloom y se baja la resolución */
+  adaptQuality(dt) {
+    if (this.perf.done || this.time < 2) return;
+    this.perf.acc += dt; this.perf.n++;
+    if (this.perf.n >= 90) {
+      if (this.perf.acc / this.perf.n > 1 / 40) { this.stage.bloomOn = false; this.stage.dpr = 1; this.stage.renderer.setPixelRatio(1); this.stage.resize(); }
+      this.perf.done = true;
+    }
+  }
+}
+
+/* ── Arranque con alternativa si WebGL no está disponible ── */
+function webglAvailable() {
+  try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch { return false; }
+}
+if (CONFIG.reducedMotion) document.documentElement.classList.add('reduced');
+if (!webglAvailable()) {
+  window.__wfFallback('Tu navegador no pudo iniciar WebGL: se muestra la narrativa completa con un diagrama estático.');
+} else {
+  try { window.__wfApp = new App(); }
+  catch (err) { console.error(err); window.__wfFallback('No se pudo iniciar el modelo 3D: se muestra la narrativa completa con un diagrama estático.'); }
+}
+</script>
+</body>
+</html>

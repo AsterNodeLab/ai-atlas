@@ -35,6 +35,7 @@ app/                      Rutas (todas estáticas / SSG)
   tools/                  Recursos: directorio de herramientas de IA (enlaces oficiales verificados)
   llms/                   Recursos: LLMs y prompting efectivo (contenido en components/llms/content.ts)
   agents/                 Recursos: Anatomía de un agente (incrusta public/anatomia_agente_ia.html)
+  workflows/              Recursos: Anatomía de un workflow (incrusta public/anatomia_workflow.html; texto en components/workflows/content.ts)
   papers/                 Recursos: 20 papers fundamentales explicados y /papers/[slug]
   models/                 Recursos: glosario de modelos, /models/[proveedor] y /models/[proveedor]/[modelo]
   search-index.json/      Índice de búsqueda estático (lo consume el cliente)

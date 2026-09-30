@@ -153,6 +153,7 @@ export default function HomePage() {
             { href: "/prompts", title: "Prompts y agentes", text: "Cómo estructurar prompts para Claude, ChatGPT y Gemini, cómo diseñar loops de agentes y un compilador de prompts sin IA.", cta: "Aprender y construir" },
             { href: "/llms", title: "LLMs y prompting", text: "Qué hace un LLM en un workflow y en un agente, cómo conectarlo y una plantilla para tu primer prompt útil.", cta: "Leer la guía" },
             { href: "/agents", title: "Anatomía de un agente", text: "Una experiencia 3D con un robot humanoide: modelo, system prompt, contexto, memoria, tools, skills, guardrails y el loop.", cta: "Explorar en 3D" },
+            { href: "/workflows", title: "Anatomía de un workflow", text: "Una experiencia 3D con estaciones conectadas: disparador, pasos con datos, decisiones, controles y resultado, con un solo ejemplo.", cta: "Recorrer en 3D" },
             { href: "/papers", title: "Papers explicados", text: `Los ${papers.length} papers que construyeron la IA moderna, del Transformer a DeepSeek-R1, explicados en español.`, cta: "Leer papers" },
             { href: "/models", title: "Glosario de modelos", text: `${getAllModels().length} modelos de ${getProviders().length} proveedores con contexto, precios y capacidades, a partir de datos de OpenRouter.`, cta: "Ver modelos" },
           ].map((r) => (

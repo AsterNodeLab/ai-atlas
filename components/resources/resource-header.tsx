@@ -7,10 +7,11 @@ const resourceTabs = [
   { key: "llms", href: "/llms", label: "LLMs" },
   { key: "papers", href: "/papers", label: "Papers" },
   { key: "agents", href: "/agents", label: "Agentes" },
+  { key: "workflows", href: "/workflows", label: "Workflows" },
 ] as const;
 
 /**
- * Distinct hero used by the "Recursos" sections (Herramientas, Modelos, Prompts, LLMs, Papers, Agentes).
+ * Distinct hero used by the "Recursos" sections (Herramientas, Modelos, Prompts, LLMs, Papers, Agentes, Workflows).
  * Shares typography with the rest of the site but uses the teal accent,
  * a dotted backdrop and a "Recursos" switcher so it reads as a separate area.
  */
